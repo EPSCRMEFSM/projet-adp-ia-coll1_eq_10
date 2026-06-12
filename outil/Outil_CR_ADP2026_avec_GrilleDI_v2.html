@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Outil d'aide à la décision EPS - Course de Relais - ADP 2026">
+<title>Outil v0 — Course de Relais — CR — ADP2026</title>
+<style>
+:root{
+  --A:#FCEBEB;--A2:#d9534f;--At:#7a1a1a;
+  --B:#FAEEDA;--B2:#e6a817;--Bt:#6b4200;
+  --C:#EAF3DE;--C2:#5a9e3a;--Ct:#1a5e0a;
+  --bg:#f2f2f0;--ink:#111;--muted:#666;
+  --panel:#fff;--border:#ccc;--header:#1a1a2e;--htext:#f0f0f0;
+  --step-active:#1a1a2e;--step-done:#5a9e3a;--step-lock:#bbb;
+  --font:'Courier Prime','Courier New',monospace;
+  --ui:'Segoe UI',system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--ui);background:var(--bg);color:var(--ink);font-size:13px;min-width:360px}
+a{color:inherit}
+
+/* HEADER */
+.app-header{background:var(--header);color:var(--htext);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.app-header .title{font-family:var(--font);font-size:14px;font-weight:bold;letter-spacing:.08em;text-transform:uppercase}
+.app-header .sub{font-size:9px;opacity:.65;margin-top:2px}
+.badge{background:#e6a817;color:#111;padding:2px 8px;font-size:9px;font-weight:bold;border-radius:2px}
+
+/* PRIVACY BANNER */
+.privacy-banner{background:#e8f5e9;border-left:4px solid var(--C2);padding:8px 12px;font-size:11px;color:var(--Ct);margin-bottom:8px}
+.privacy-banner strong{font-family:var(--font)}
+
+/* STEP BAR */
+.step-bar{display:flex;background:#fff;border-bottom:2px solid var(--border);overflow-x:auto}
+.step-tab{flex:1;min-width:70px;padding:8px 4px;text-align:center;font-size:10px;font-weight:bold;font-family:var(--font);letter-spacing:.05em;text-transform:uppercase;color:var(--step-lock);border-right:1px solid var(--border);cursor:not-allowed;transition:all .2s;user-select:none;border-bottom:3px solid transparent}
+.step-tab.done{color:var(--step-done);cursor:pointer}
+.step-tab.done:hover{background:#f0f9ea}
+.step-tab.active{color:var(--step-active);border-bottom-color:var(--step-active);cursor:default;background:#fafafa}
+.step-tab .snum{font-size:16px;display:block;line-height:1}
+
+/* CONTAINER */
+.container{max-width:1100px;margin:0 auto;padding:12px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:3px;margin-bottom:12px;overflow:hidden}
+.panel-head{background:var(--header);color:var(--htext);padding:7px 12px;font-family:var(--font);font-size:11px;font-weight:bold;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.panel-body{padding:12px}
+
+/* SAISIE */
+.saisie-grid{display:grid;grid-template-columns:1fr repeat(4,auto) auto;gap:4px;align-items:center;margin-bottom:8px;font-size:11px}
+.saisie-grid .col-h{font-family:var(--font);font-size:9px;font-weight:bold;color:var(--muted);text-align:center;letter-spacing:.06em;text-transform:uppercase;padding:2px 4px;background:#f5f5f5;border:1px solid var(--border);border-radius:2px}
+.saisie-grid .col-h.left{text-align:left}
+.name-input{width:100%;border:1px solid var(--border);border-radius:2px;padding:4px 6px;font-family:var(--font);font-size:11px;outline:none}
+.name-input:focus{border-color:var(--step-active)}
+.deg-sel{display:flex;gap:2px;justify-content:center}
+.d-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);font-size:9px;font-weight:bold;cursor:pointer;background:#fff;color:#aaa;font-family:var(--ui);transition:all .1s;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.d-btn:hover{border-color:#555;color:#333}
+.d-btn.sA{background:var(--A);border-color:var(--A2);color:var(--At);border-width:2px}
+.d-btn.sB{background:var(--B);border-color:var(--B2);color:var(--Bt);border-width:2px}
+.d-btn.sC{background:var(--C);border-color:var(--C2);color:var(--Ct);border-width:2px}
+.del-btn{background:none;border:1px solid #ddd;border-radius:2px;color:#bbb;cursor:pointer;padding:3px 6px;font-size:10px;touch-action:manipulation}
+.del-btn:hover{border-color:#d9534f;color:#d9534f}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:2px;border:1.5px solid var(--ink);font-family:var(--ui);font-size:11px;font-weight:bold;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;transition:all .15s;background:#fff;color:var(--ink);touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.btn:hover{background:var(--ink);color:#fff}
+.btn.primary{background:var(--header);color:#fff;border-color:var(--header)}
+.btn.primary:hover{background:#0f0f22}
+.btn.success{background:var(--C2);color:#fff;border-color:var(--C2)}
+.btn.success:hover{background:#3d7a1a}
+.btn.danger{background:var(--A2);color:#fff;border-color:var(--A2)}
+.btn.danger:hover{background:#7a1a1a}
+.btn.sm{padding:4px 9px;font-size:10px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:10px;font-family:var(--font)}
+.data-table th{background:#f0f0f0;border:1px solid var(--border);padding:4px 5px;text-align:center;font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);white-space:nowrap}
+.data-table td{border:1px solid #eee;padding:4px 5px;text-align:center;vertical-align:middle}
+.data-table tr.pA td{background:var(--A)}
+.data-table tr.pB td{background:var(--B)}
+.data-table tr.pC td{background:var(--C)}
+.data-table td.left{text-align:left}
+.data-table .rank{font-weight:bold;color:var(--muted);font-size:9px}
+
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}
+.card{border-radius:3px;padding:10px;text-align:center;border:1.5px solid transparent}
+.card.cA{background:var(--A);border-color:var(--A2)}
+.card.cB{background:var(--B);border-color:var(--B2)}
+.card.cC{background:var(--C);border-color:var(--C2)}
+.card.cN{background:#f5f5f5;border-color:#ccc}
+.card .cval{font-size:24px;font-weight:bold;font-family:var(--font)}
+.card .clab{font-size:9px;font-family:var(--font);text-transform:uppercase;letter-spacing:.08em;opacity:.7}
+
+/* AXIS */
+.axis-item{border:1.5px solid var(--border);border-radius:3px;padding:10px;margin-bottom:8px;cursor:pointer;transition:all .15s;display:flex;gap:10px;align-items:flex-start}
+.axis-item:hover{border-color:var(--step-active)}
+.axis-item.selected{border-color:var(--step-active);background:#f0f4ff}
+.axis-item input[type=checkbox]{width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer}
+.axis-title{font-weight:bold;font-size:12px;margin-bottom:4px}
+.axis-meta{font-size:10px;color:var(--muted);font-family:var(--font)}
+.axis-bar{height:6px;border-radius:3px;background:#eee;margin-top:6px;overflow:hidden}
+.axis-bar-fill{height:100%;border-radius:3px;background:var(--A2);transition:width .4s}
+
+/* SLIDER */
+.slider-wrap{margin:16px 0}
+.slider-wrap label{font-weight:bold;font-size:12px;display:block;margin-bottom:8px}
+input[type=range]{width:100%;accent-color:var(--header);height:8px}
+.slider-val{font-family:var(--font);font-size:18px;font-weight:bold;color:var(--step-active);margin:4px 0 10px}
+.distrib-preview{background:#f8f8f8;border:1px solid var(--border);border-radius:3px;padding:10px;font-family:var(--font);font-size:11px}
+.distrib-seq{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.distrib-seq .seq-label{min-width:80px;font-weight:bold;font-size:10px;color:var(--muted)}
+.seq-block{background:var(--header);color:#fff;padding:2px 8px;border-radius:2px;font-size:10px}
+
+/* PLANNING */
+.seq-section{margin-bottom:20px}
+.seq-head{background:var(--header);color:var(--htext);padding:8px 12px;border-radius:3px 3px 0 0;font-family:var(--font);font-size:11px;font-weight:bold}
+.seq-sub{background:#2a2a4e;color:#ccc;padding:4px 12px;font-size:10px;font-family:var(--font)}
+.plan-table{width:100%;border-collapse:collapse;font-size:10px}
+.plan-table th{background:#f0f0f0;border:1px solid var(--border);padding:5px;text-align:center;font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.plan-table td{border:1px solid #e8e8e8;padding:6px;vertical-align:top}
+.plan-table .td-A{background:var(--A)}
+.plan-table .td-B{background:var(--B)}
+.plan-table .td-C{background:var(--C)}
+.plan-table .td-seq{font-weight:bold;text-align:center;white-space:nowrap;font-family:var(--font)}
+.sa-chip{display:inline-block;background:rgba(0,0,0,.07);padding:1px 5px;border-radius:2px;font-size:9px;font-family:var(--font);margin-bottom:3px}
+.plan-consigne{font-size:10px;margin:2px 0}
+.plan-critere{font-size:9px;color:var(--muted);font-style:italic}
+.passage-indicator{background:#fffbe6;border:1px dashed #e6a817;border-radius:2px;padding:5px 8px;margin-top:4px;font-size:9px;font-family:var(--font)}
+.passage-indicator .pi-label{font-weight:bold;color:#7a4f00}
+
+/* DECISION */
+.decision-box{padding:10px;border-radius:3px;border:1.5px solid;margin:10px 0;font-family:var(--font);font-size:11px}
+.decision-box.dA{background:var(--A);border-color:var(--A2);color:var(--At)}
+.decision-box.dB{background:var(--B);border-color:var(--B2);color:var(--Bt)}
+.decision-box.dC{background:var(--C);border-color:var(--C2);color:var(--Ct)}
+
+/* ALERT */
+.alert{padding:8px 10px;border-radius:2px;font-size:11px;margin:6px 0}
+.alert.info{background:#e8f0fe;border-left:3px solid #3b82f6}
+.alert.warn{background:#fff3e0;border-left:3px solid #e6a817}
+.alert.err{background:var(--A);border-left:3px solid var(--A2)}
+.alert.success{background:#e8f5e9;border-left:3px solid var(--C2);color:var(--Ct)}
+
+/* OBS-ANALYSIS */
+.obs-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:11px}
+.obs-row:last-child{border-bottom:none}
+.obs-name{min-width:160px;font-family:var(--font);font-size:10px;font-weight:bold}
+.obs-moy{min-width:50px;text-align:center;font-family:var(--font);font-weight:bold}
+.obs-status{padding:2px 8px;border-radius:2px;font-size:9px;font-weight:bold}
+.obs-status.sA{background:var(--A);color:var(--At)}
+.obs-status.sB{background:var(--B);color:var(--Bt)}
+.obs-status.sC{background:var(--C);color:var(--Ct)}
+
+/* RÉSUMÉ CYCLE */
+.cycle-summary{background:#f5f5f5;border:1px solid var(--border);border-radius:3px;padding:12px;margin-top:16px;font-family:var(--font);font-size:11px}
+.cycle-summary h3{font-size:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em}
+
+/* MISSING */
+.missing-flag{background:#fff8e1;border:1px solid #e6a817;border-radius:3px;padding:10px;margin-bottom:12px;font-family:var(--font);font-size:11px}
+.missing-flag .mf-title{font-weight:bold;color:#7a4f00;margin-bottom:4px}
+
+/* SESSION PANEL */
+.session-panel{background:#f8f9fa;border:1px solid var(--border);border-radius:3px;padding:12px;margin-bottom:12px}
+.session-panel h4{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;font-family:var(--font)}
+
+/* PRINT */
+@media print{
+  .step-bar,.btn-row,.saisie-section,.app-header .badge,input[type=file],button{display:none!important}
+  .panel{box-shadow:none;border:1px solid #999}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media(max-width:600px){
+  .saisie-grid{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr 1fr}
+  .step-tab{font-size:9px;min-width:55px}
+  .step-tab .snum{font-size:13px}
+  .app-header .title{font-size:12px}
+  .data-table{font-size:9px}
+  .data-table th,.data-table td{padding:2px 3px}
+  .plan-table th,.plan-table td{padding:3px}
+  .axis-item{flex-direction:column;gap:6px}
+}
+@media(max-width:400px){
+  .cards{grid-template-columns:1fr}
+  .btn{font-size:10px;padding:6px 10px}
+  .btn.sm{padding:3px 6px;font-size:9px}
+}
+
+/* ── BOUTON GRILLE DI ─────────────── */
+.btn-grille-di {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 13px;
+  background: #e6a817;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 2px;
+  font-family: var(--ui);
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-grille-di:hover { background: #f0c040; transform: translateY(-1px); }
+.btn-grille-di:active { transform: none; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div>
+    <div class="title">Outil d'aide à la décision — Course de Relais — CR</div>
+    <div class="sub">ADP 2026 · CRMEF Inezgane · BOUARGANE · DI — Diagnostique Initial · Pas de note /20</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="badge">v0 · 4 ÉTAPES</div>
+    <button class="btn-grille-di" onclick="ouvrirGrilleDI()" title="Ouvrir la grille diagnostique terrain — 8 équipes">
+      &#128203; Grille DI Terrain
+    </button>
+  </div>
+</div>
+
+<div class="privacy-banner">
+  <strong>🔒 Confidentialité totale :</strong> Aucune donnée n'est envoyée sur Internet. Tout reste stocké localement sur votre appareil. Fonctionne hors connexion.
+</div>
+
+<div class="step-bar" id="stepBar">
+  <div class="step-tab active" id="tab0" onclick="goStep(0)">
+    <span class="snum">&#9654;</span>Saisie
+  </div>
+  <div class="step-tab" id="tab1">
+    <span class="snum">1</span>Diagnostic
+  </div>
+  <div class="step-tab" id="tab2">
+    <span class="snum">2</span>Axes
+  </div>
+  <div class="step-tab" id="tab3">
+    <span class="snum">3</span>Paramètres
+  </div>
+  <div class="step-tab" id="tab4">
+    <span class="snum">4</span>Planification
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== SAISIE ===== -->
+<div id="sec-saisie" class="saisie-section">
+
+  <div class="panel">
+    <div class="panel-head">
+      <span>Saisie manuelle — 1 ligne par élève / équipe</span>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <label class="btn sm" style="cursor:pointer">
+          &#128196; Importer CSV <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="importCSV(this)">
+        </label>
+        <button class="btn sm primary" onclick="addRow()">+ Ajouter ligne</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div id="alert-zone"></div>
+      <div class="saisie-grid" id="saisieHeader">
+        <div class="col-h left">Prénom / Équipe</div>
+        <div class="col-h">OBS-01<br>QC</div>
+        <div class="col-h">OBS-02<br>Perf</div>
+        <div class="col-h">OBS-03<br>QT</div>
+        <div class="col-h">OBS-05<br>AV</div>
+        <div class="col-h"></div>
+      </div>
+      <div id="rowsContainer"></div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="analyser()">&#9654; Analyser la classe</button>
+        <button class="btn sm" onclick="resetAll()">&#8635; Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSION MANAGEMENT -->
+  <div class="session-panel">
+    <h4>&#128451; Gestion de session</h4>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">
+      Sauvegardez votre travail ou chargez une session précédente. Les données restent sur votre appareil.
+    </div>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn sm success" onclick="exportSession()">&#128190; Exporter session (.json)</button>
+      <label class="btn sm" style="cursor:pointer">
+        &#128193; Importer session <input type="file" id="sessionFile" accept=".json" style="display:none" onchange="importSession(this)">
+      </label>
+      <button class="btn sm danger" onclick="clearAllData()">&#128465; Nouvelle session</button>
+    </div>
+    <div id="session-status" style="font-size:10px;color:var(--muted);margin-top:6px;font-family:var(--font)"></div>
+  </div>
+
+</div>
+
+<!-- ===== ÉTAPE 1 ===== -->
+<div id="sec-step1" style="display:none">
+  <div class="panel">
+    <div class="panel-head">
+      <span>Étape 1 — Diagnostic de classe</span>
+      <button class="btn sm" onclick="window.print()">&#128424; Imprimer</button>
+    </div>
+    <div class="panel-body">
+      <div id="step1-content"></div>
+      <div class="btn-row">
+        <button class="btn sm" onclick="goStep(0)">&#8592; Retour saisie</button>
+        <button class="btn success" onclick="goStep(2)">Étape 2 — Axes prioritaires &#9654;</button>
+        <button class="btn sm" id="btnExport" onclick="exportCSV()">&#8595; Exporter CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ÉTAPE 2 ===== -->
+<div id="sec-step2" style="display:none">
+  <div class="panel">
+    <div class="panel-head">Étape 2 — Sélection des axes prioritaires (3 ou 4 maximum)</div>
+    <div class="panel-body">
+      <div class="alert info">Cochez <strong>3 ou 4 axes</strong>. La planification sera générée uniquement sur les axes validés. La décision finale reste à l'enseignant.</div>
+      <div id="axes-list"></div>
+      <div id="axes-alert" class="alert warn" style="display:none">Sélectionnez entre 3 et 4 axes pour continuer.</div>
+      <div class="btn-row">
+        <button class="btn sm" onclick="goStep(1)">&#8592; Retour diagnostic</button>
+        <button class="btn success" id="btnStep3" onclick="goStep(3)" disabled>Étape 3 — Paramétrer le cycle &#9654;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ÉTAPE 3 ===== -->
+<div id="sec-step3" style="display:none">
+  <div class="panel">
+    <div class="panel-head">Étape 3 — Paramétrage du cycle</div>
+    <div class="panel-body">
+      <div class="slider-wrap">
+        <label>Nombre de séances du cycle</label>
+        <input type="range" id="sliderSeances" min="6" max="10" value="6" step="1" oninput="updateSlider()">
+        <div class="slider-val" id="sliderVal">6 séances</div>
+      </div>
+      <div class="distrib-preview" id="distribPreview"></div>
+      <div class="btn-row">
+        <button class="btn sm" onclick="goStep(2)">&#8592; Retour axes</button>
+        <button class="btn success" onclick="genererPlanification()">Étape 4 — Générer la planification &#9654;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ÉTAPE 4 ===== -->
+<div id="sec-step4" style="display:none">
+  <div class="panel">
+    <div class="panel-head">
+      <span>Étape 4 — Planification dynamique du cycle</span>
+      <button class="btn sm" onclick="window.print()">&#128424; Imprimer</button>
+    </div>
+    <div class="panel-body">
+      <div id="step4-content"></div>
+      <div class="btn-row">
+        <button class="btn sm" onclick="goStep(3)">&#8592; Retour paramètres</button>
+        <button class="btn sm" id="btnExport4" onclick="exportCSV()">&#8595; Exporter CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+/* ================================================
+   CONFIG — EXTRAITE DES FICHIERS TD1/TD2 — ADP2026
+   ================================================ */
+
+const APS  = "Course de Relais";
+const CODE = "CR";
+const VERSION = "v1.0-deploy";
+const STORAGE_KEY = "outil_eps_cr_2026";
+
+/* Observables actifs (grille_course_de_relais_CR.txt) */
+const OBS = [
+  { id:"OBS01", label:"OBS-01 QC", nom:"Qualité collective du relais",
+    codes:{ A:"QC-", B:"QC~", C:"QC+" },
+    desc:{ A:"Relais discontinu — tamponnent ou hésitent",
+           B:"Relais coordonné — vitesses partiellement ajustées",
+           C:"Relais fluide — sans rupture ni décélération" } },
+  { id:"OBS02", label:"OBS-02 Perf", nom:"Performance équipe 4x50m",
+    codes:{ A:"PF-", B:"PF~", C:"PF+" },
+    desc:{ A:"Faible — G>36\"0 / F>42\"0",
+           B:"Moyenne — G 28\"6-36\"0 / F 33\"1-42\"0",
+           C:"Élevée — G<=28\"5 / F<=33\"0" } },
+  { id:"OBS03", label:"OBS-03 QT", nom:"Qualité de transmission",
+    codes:{ A:"QT-", B:"QT~", C:"QT+" },
+    desc:{ A:"Imprécise — regarde en arrière, ralentit",
+           B:"Fonctionnelle — correcte mais hésitante",
+           C:"Maîtrisée — rapide et précise dans la zone" } },
+  { id:"OBS05", label:"OBS-05 AV", nom:"Ajustement des vitesses",
+    codes:{ A:"AV-", B:"AV~", C:"AV+" },
+    desc:{ A:"Absent — receveur attend à l'arrêt ou part trop tôt",
+           B:"Partiel — transmission tendue",
+           C:"Optimal — même vitesse au passage" } }
+];
+
+/* Scores et seuils (fourchettes définies ADP2026) */
+const SCORES = { A:3, B:6, C:9 };
+const SEUILS = { C:7.5, B:4.5 };
+
+/* SA (déduites des axes — non explicitées dans le référentiel) */
+const SA = {
+  "SA-A1": "Jeu de la marque (construction du repère)",
+  "SA-B1": "Relais en dissociation (maintien vitesse)",
+  "SA-C1": "Projet tactique collectif (optimisation)"
+};
+
+/* Axes extraits du référentiel 1bis-A + capacités S3 ressources */
+const AXES = [
+  { id:1, obs:"OBS05",
+    titre:"Construction et régulation de la marque de passage pour synchroniser les vitesses",
+    lacune:"N1-6 — AV- dominant",
+    impact:"N2-6d · N2-6e · N2-6 (zone d'élan)",
+    sa:"SA-A1",
+    consA:"Poser une marque au sol et déclencher son élan lorsque le donneur la franchit",
+    consB:"Affiner la marque après chaque passage selon l'écart de vitesses observé",
+    consC:"Personnaliser la marque selon son profil physique et améliorer l'indice de transmission",
+    critA:"Le receveur s'élance avant que le donneur n'arrive à hauteur",
+    critB:"L'écart de vitesses visible à la transmission diminue d'un passage à l'autre",
+    critC:"L'indice de transmission est positif (équipe plus rapide en relais qu'en individuel)",
+    conduite:"Le receveur s'élance depuis sa marque sans regarder en arrière dans au moins 2 passages sur 3"
+  },
+  { id:2, obs:"OBS03",
+    titre:"Dissociation segmentaire train supérieur/inférieur pour transmettre sans décélérer",
+    lacune:"N1-5 — QT- dominant",
+    impact:"N2-6b · N2-6c · N2-6f (fluidité charnière)",
+    sa:"SA-B1",
+    consA:"Exercice bras-course : courir en tendant le bras arrière sans ralentir sur 20m",
+    consB:"Transmettre le témoin à pleine course sur un signal verbal du donneur",
+    consC:"Coordonner courir / donner signal / identifier main / transmettre en une action fluide",
+    critA:"Le donneur ne ralentit pas visiblement lors de la transmission",
+    critB:"La transmission a lieu sans que les relayeurs ne se retournent",
+    critC:"Le témoin est transmis en zone sans rupture de rythme observable",
+    conduite:"Le donneur maintient sa vitesse maximale jusqu'au passage du témoin sans hésitation visible"
+  },
+  { id:3, obs:"OBS03",
+    titre:"Posture du receveur : prise d'informations vers l'arrière en action (N1-3)",
+    lacune:"N1-3 — QT- AV-",
+    impact:"N2-6d · N2-6e (réactivité sur signal)",
+    sa:"SA-A1",
+    consA:"Marcher-courir en regardant en diagonale arrière pour toucher la main du partenaire",
+    consB:"Présenter la main receveuse en courant sur réaction au signal verbal",
+    consC:"Intégrer posture et vitesse en situation de relais 4x50m",
+    critA:"Le receveur tourne seulement la tête (pas le corps) pour regarder en arrière",
+    critB:"La main receveuse est présentée avant que le donneur n'arrive",
+    critC:"Transmission correcte sans aucun regard en arrière",
+    conduite:"Le receveur présente sa main receveuse en courant sans se retourner lors de 2 passages sur 3"
+  },
+  { id:4, obs:"OBS01",
+    titre:"Communication collective sur critères précis pour réguler le projet tactique (N1-7)",
+    lacune:"N1-7 — QC- / QC~",
+    impact:"N2-1 (projet tactique collectif)",
+    sa:"SA-C1",
+    consA:"Nommer un critère observable après chaque relais (écart, timing, zone)",
+    consB:"Proposer un ajustement de marque ou d'ordre de passage basé sur le chrono",
+    consC:"Définir collectivement un projet tactique en fonction des ressources de chacun",
+    critA:"L'équipe identifie au moins un problème après chaque passage",
+    critB:"L'équipe propose un ajustement mesurable entre deux passages",
+    critC:"Le projet tactique est formalisé et améliore l'indice de transmission",
+    conduite:"L'équipe ajuste sa marque de passage après chaque relais en utilisant des critères observables"
+  },
+  { id:5, obs:"OBS01",
+    titre:"Enchaînement des efforts anaérobies avec récupération entre passages (N1-1)",
+    lacune:"N1-1 — épuisement précoce (QC-)",
+    impact:"N2-2 · N2-5 (maintien vitesse sur le relais)",
+    sa:"SA-B1",
+    consA:"Alterner sprint 30m / marche 30m x 4 : gérer sa récupération entre les efforts",
+    consB:"Répéter 3 relais complets en maintenant un écart chrono < 2 sec entre les passages",
+    consC:"Optimiser l'ordre de passage selon les ressources physiques individuelles",
+    critA:"Chaque relayeur est disposé à courir à son tour sans temps mort excessif",
+    critB:"La vitesse du dernier relayeur est comparable à celle du premier",
+    critC:"Le classement des relayeurs par ordre de passage maximise la performance collective",
+    conduite:"Chaque relayeur maintient sa vitesse de course du départ jusqu'à la transmission sans décélération visible"
+  },
+  { id:6, obs:"OBS01",
+    titre:"Direction de course dans le couloir à vitesse maximale, sans dérive latérale (N1-4)",
+    lacune:"N1-4 — dérive latérale (QC-)",
+    impact:"N2-3 · N2-4 (alignement corps / forces propulsives)",
+    sa:"SA-B1",
+    consA:"Courir entre deux lignes espacées de 1m sur 50m sans les toucher",
+    consB:"Maintenir la direction en accélérant et en transmettant le témoin",
+    consC:"Intégrer alignement et dissociation en relais complet",
+    critA:"Aucune sortie de couloir sur les 50m",
+    critB:"La ligne de course reste droite même lors de la phase de transmission",
+    critC:"L'alignement corps/forces est maintenu sur tout le relais",
+    conduite:"Le relayeur court en ligne droite dans son couloir sans sortie latérale sur les 50m"
+  }
+];
+
+/* Distribution séances par axes selon tableau prompt */
+const DISTRIB = {
+  3:{ 6:[2,2,2], 7:[2,2,3], 8:[3,2,3], 9:[3,3,3], 10:[3,4,3] },
+  4:{ 6:[1,2,2,1], 7:[2,2,2,1], 8:[2,2,2,2], 9:[2,3,2,2], 10:[3,2,3,2] }
+};
+
+/* ================================================
+   ÉTAT DE L'APPLICATION
+   ================================================ */
+let eleves = [];
+let selectedAxes = [];
+let nbSeances = 6;
+let currentStep = 0;
+let rowCount = 0;
+
+/* ================================================
+   PERSISTANCE LOCALSTORAGE
+   ================================================ */
+function saveState(){
+  const state = {
+    eleves: eleves,
+    selectedAxes: selectedAxes,
+    nbSeances: nbSeances,
+    rowCount: rowCount,
+    version: VERSION
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updateSessionStatus("Session sauvegardée automatiquement");
+  } catch(e) {
+    console.warn("Sauvegarde localStorage échouée:", e);
+  }
+}
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const state = JSON.parse(raw);
+    if(state.version !== VERSION){
+      console.warn("Version de session incompatible, ignorée");
+      return false;
+    }
+    eleves = state.eleves || [];
+    selectedAxes = state.selectedAxes || [];
+    nbSeances = state.nbSeances || 6;
+    rowCount = state.rowCount || 0;
+    return true;
+  } catch(e) {
+    console.warn("Chargement localStorage échoué:", e);
+    return false;
+  }
+}
+
+function updateSessionStatus(msg){
+  const el = document.getElementById("session-status");
+  if(el){
+    const now = new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+    el.textContent = msg + " — " + now;
+  }
+}
+
+/* ================================================
+   INTERFACE — NAVIGATION ENTRE ÉTAPES
+   ================================================ */
+function goStep(n){
+  const sections = ["sec-saisie","sec-step1","sec-step2","sec-step3","sec-step4"];
+  const tabs = ["tab0","tab1","tab2","tab3","tab4"];
+  sections.forEach((s,i)=>{ document.getElementById(s).style.display = (i===n)?"block":"none"; });
+  tabs.forEach((t,i)=>{
+    const el = document.getElementById(t);
+    el.classList.remove("active","done");
+    if(i===n) el.classList.add("active");
+    else if(i<n) el.classList.add("done");
+  });
+  currentStep = n;
+  if(n===2) renderAxes();
+  if(n===3) updateSlider();
+  window.scrollTo(0,0);
+}
+
+/* ================================================
+   SAISIE — LIGNES
+   ================================================ */
+function addRow(data){
+  rowCount++;
+  const rid = "row"+rowCount;
+  const d = data || { nom:"", d1:"", d2:"", d3:"", d5:"" };
+  const html = `<div class="saisie-grid" id="${rid}">
+    <input class="name-input" type="text" placeholder="Prénom ou Équipe..." value="${d.nom}">
+    ${["d1","d2","d3","d5"].map((k,i)=>`
+    <div class="deg-sel" data-obs="${OBS[i].id}">
+      <button class="d-btn${d[k]==="A"?" sA":""}" onclick="selDeg(this,'A')">A</button>
+      <button class="d-btn${d[k]==="B"?" sB":""}" onclick="selDeg(this,'B')">B</button>
+      <button class="d-btn${d[k]==="C"?" sC":""}" onclick="selDeg(this,'C')">C</button>
+    </div>`).join("")}
+    <button class="del-btn" onclick="delRow('${rid}')">&#10005;</button>
+  </div>`;
+  document.getElementById("rowsContainer").insertAdjacentHTML("beforeend",html);
+}
+
+function selDeg(btn, deg){
+  const grp = btn.closest(".deg-sel");
+  const was = btn.classList.contains("s"+deg);
+  grp.querySelectorAll(".d-btn").forEach(b=>b.className="d-btn");
+  if(!was) btn.classList.add("s"+deg);
+  saveState();
+}
+
+function delRow(id){ const el=document.getElementById(id); if(el) el.remove(); saveState(); }
+
+function getRowData(rowEl){
+  const nom = rowEl.querySelector("input").value.trim();
+  const degs = [];
+  rowEl.querySelectorAll(".deg-sel").forEach(grp=>{
+    const sel = grp.querySelector(".d-btn.sA,.d-btn.sB,.d-btn.sC");
+    degs.push(sel ? sel.textContent.trim() : "");
+  });
+  return { nom, degs };
+}
+
+function showAlert(msg, type){
+  document.getElementById("alert-zone").innerHTML =
+    `<div class="alert ${type}">${msg}</div>`;
+}
+
+function clearAlert(){ document.getElementById("alert-zone").innerHTML=""; }
+
+/* ================================================
+   IMPORT CSV
+   ================================================ */
+function importCSV(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const raw = e.target.result;
+
+    // --- 1. Detecter le separateur (virgule ou point-virgule) ---
+    const firstLine = raw.split(/\r?\n/)[0] || "";
+    const sep = firstLine.includes(";") ? ";" : ",";
+
+    const lines = raw.split(/\r?\n/).filter(l => l.trim().length > 0);
+
+    // --- 2. Chercher la ligne d'en-tete ---
+    let headerIdx = -1;
+    let headers = [];
+    const nomPatterns = ["nom","prenom","prenom","nom_eleve","eleve","eleve","apprenant","etudiant","etudiant","participant","equipe","equipe"];
+    const obsPatterns = [
+      { id: "OBS01", label: "OBS-01 QC", aliases: ["obs01","obs-01","qc","qualite","qualite","collectif","relais"] },
+      { id: "OBS02", label: "OBS-02 Perf", aliases: ["obs02","obs-02","perf","performance","temps","chrono"] },
+      { id: "OBS03", label: "OBS-03 QT", aliases: ["obs03","obs-03","qt","transmission","transfert","passage"] },
+      { id: "OBS05", label: "OBS-05 AV", aliases: ["obs05","obs-05","av","vitesse","ajustement","vitesse"] }
+    ];
+
+    for(let i=0; i<lines.length; i++){
+      const low = lines[i].toLowerCase();
+      // Si la ligne contient un mot ressemblant a "nom" ET un mot ressemblant a "obs"
+      const hasNom = nomPatterns.some(p => low.includes(p));
+      const hasObs = obsPatterns.some(p => p.aliases.some(a => low.includes(a)));
+      if(hasNom || hasObs){
+        headerIdx=i; headers=lines[i].split(sep).map(h=>h.trim().replace(/^["']|["']$/g,"")); break;
+      }
+    }
+
+    if(headerIdx<0){ 
+      showAlert("En-tete CSV non trouvee. Verifiez que votre fichier contient des colonnes pour le nom et les observables (OBS-01 QC, OBS-02 Perf, OBS-03 QT, OBS-05 AV).","err"); 
+      return; 
+    }
+
+    // --- 3. Mapper les colonnes ---
+    const headerLow = headers.map(h => h.toLowerCase());
+
+    // Trouver l'index de la colonne "nom"
+    let nomIdx = -1;
+    for(let i=0; i<headerLow.length; i++){
+      if(nomPatterns.some(p => headerLow[i].includes(p))){ nomIdx = i; break; }
+    }
+    if(nomIdx < 0) nomIdx = 0; // fallback : premiere colonne
+
+    // Trouver l'index de chaque observable
+    const obsIdxs = obsPatterns.map(obs => {
+      for(let i=0; i<headerLow.length; i++){
+        const h = headerLow[i];
+        if(h.includes(obs.id.toLowerCase())) return i;
+        if(obs.aliases.some(a => h.includes(a))) return i;
+      }
+      return -1;
+    });
+
+    // --- 4. Parser les lignes ---
+    let imported = 0, ignored = 0;
+    for(let i=headerIdx+1; i<lines.length; i++){
+      const parts = lines[i].split(sep).map(p => p.trim().replace(/^["']|["']$/g, ""));
+      if(parts.length < 2){ ignored++; continue; }
+
+      const nom = (parts[nomIdx] || "").trim();
+      if(!nom){ ignored++; continue; }
+
+      // Extraire les degres A/B/C pour chaque observable
+      const degs = obsIdxs.map((idx, obsPos) => {
+        if(idx < 0 || idx >= parts.length) return "";
+        const val = parts[idx].toUpperCase().trim();
+
+        // Valeur directe A/B/C
+        if(["A","B","C"].includes(val)) return val;
+
+        // Codes comme QC-, QC~, QC+, PF-, PF~, etc.
+        const codeMap = {
+          "QC-":"A", "QC~":"B", "QC+":"C",
+          "PF-":"A", "PF~":"B", "PF+":"C",
+          "QT-":"A", "QT~":"B", "QT+":"C",
+          "AV-":"A", "AV~":"B", "AV+":"C"
+        };
+        if(codeMap[val]) return codeMap[val];
+
+        // Si c'est un nombre, convertir en A/B/C selon les seuils
+        const num = parseFloat(val.replace(",","."));
+        if(!isNaN(num)){
+          if(num >= 7.5) return "C";
+          if(num >= 4.5) return "B";
+          return "A";
+        }
+
+        return "";
+      });
+
+      addRow({ nom, d1: degs[0], d2: degs[1], d3: degs[2], d5: degs[3] });
+      imported++;
+    }
+
+    showAlert(`${imported} ligne(s) importee(s). ${ignored} ignoree(s).`, imported > 0 ? "info" : "warn");
+    saveState();
+  };
+  reader.readAsText(file, "UTF-8");
+  input.value = "";
+}
+
+/* ================================================
+   TRAITEMENT — ANALYSE
+   ================================================ */
+function profil(score){
+  if(score>=SEUILS.C) return "C";
+  if(score>=SEUILS.B) return "B";
+  return "A";
+}
+
+function analyser(){
+  clearAlert();
+  const rows = document.querySelectorAll("#rowsContainer .saisie-grid");
+  eleves = [];
+  let errors = 0;
+  rows.forEach(row=>{
+    const {nom,degs} = getRowData(row);
+    if(!nom){ errors++; return; }
+    const missing = degs.filter(d=>!d).length;
+    if(missing>0){ errors++; showAlert(`"${nom}" — ${missing} observable(s) non renseigné(s).`,"err"); return; }
+    const scores = degs.map(d=>SCORES[d]);
+    const moy = scores.reduce((a,b)=>a+b,0)/scores.length;
+    const profG = profil(moy);
+    const profsD = scores.map(s=>profil(s));
+    const lacunes = scores.map((s,i)=>({obs:OBS[i],score:s,deg:degs[i]}))
+      .filter(x=>x.score<SEUILS.B).sort((a,b)=>a.score-b.score);
+    const axePrio = lacunes.length>0
+      ? AXES.find(ax=>ax.obs===lacunes[0].obs.id) || AXES[0]
+      : AXES[5];
+    const saPrio = lacunes.length>0 ? axePrio.sa : "SA-C1";
+    eleves.push({ nom, degs, scores, moy, profG, profsD, lacunes, axePrio, saPrio });
+  });
+  if(eleves.length===0){ showAlert("Aucun élève valide. Ajoutez des lignes complètes.","err"); return; }
+  eleves.sort((a,b)=>b.moy-a.moy);
+  eleves.forEach((e,i)=>e.rang=i+1);
+  saveState();
+  renderStep1();
+  goStep(1);
+}
+
+/* ================================================
+   ÉTAPE 1 — RENDU DIAGNOSTIC
+   ================================================ */
+function renderStep1(){
+  const totA=eleves.filter(e=>e.profG==="A").length;
+  const totB=eleves.filter(e=>e.profG==="B").length;
+  const totC=eleves.filter(e=>e.profG==="C").length;
+  const n=eleves.length;
+  const moyClasse=(eleves.reduce((s,e)=>s+e.moy,0)/n).toFixed(1);
+  const sur20=(parseFloat(moyClasse)*2).toFixed(1);
+  let dom = totA>=totB&&totA>=totC?"A":totB>=totA&&totB>=totC?"B":"C";
+
+  /* Tableau individuel */
+  let tbl=`<div style="overflow-x:auto"><table class="data-table">
+  <thead><tr>
+    <th>Rang</th><th>Prénom</th>
+    ${OBS.map(o=>`<th>${o.label}</th>`).join("")}
+    <th>Moy</th><th>/20</th><th>Profil</th><th>Détail</th><th>Lacune 1</th><th>Axe prioritaire</th><th>SA</th>
+  </tr></thead><tbody>`;
+  eleves.forEach(e=>{
+    const l1=e.lacunes.length>0?`L1 — ${e.lacunes[0].obs.label} : ${e.lacunes[0].score}/10`:"Aucune";
+    tbl+=`<tr class="p${e.profG}">
+      <td class="rank">${e.rang}</td>
+      <td class="left"><strong>${e.nom}</strong></td>
+      ${e.degs.map((d,i)=>`<td><span style="font-family:var(--font);font-weight:bold">${OBS[i].codes[d]}</span></td>`).join("")}
+      <td><strong>${e.moy.toFixed(1)}</strong></td>
+      <td>${(e.moy*2).toFixed(1)}</td>
+      <td><strong>${e.profG}</strong></td>
+      <td style="font-family:var(--font);font-size:9px">${e.profsD.join(" / ")}</td>
+      <td style="font-family:var(--font);font-size:9px">${l1}</td>
+      <td style="font-size:9px">${e.axePrio.titre.substring(0,40)}&hellip;</td>
+      <td><span style="font-family:var(--font);font-size:9px">${e.saPrio}</span></td>
+    </tr>`;
+  });
+  tbl+="</tbody></table></div>";
+
+  /* Cartes */
+  const cards=`<div class="cards">
+    <div class="card cA"><div class="cval">${totA}</div><div class="clab">Débutants A<br>${Math.round(totA/n*100)}%</div></div>
+    <div class="card cB"><div class="cval">${totB}</div><div class="clab">Intermédiaires B<br>${Math.round(totB/n*100)}%</div></div>
+    <div class="card cC"><div class="cval">${totC}</div><div class="clab">Avancés C<br>${Math.round(totC/n*100)}%</div></div>
+    <div class="card cN"><div class="cval">${moyClasse}/10</div><div class="clab">Moyenne classe<br>${sur20}/20</div></div>
+  </div>`;
+
+  /* Analyse observables */
+  let obsAnalysis="<h4 style=\"margin:12px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)\">Analyse par observable</h4>";
+  OBS.forEach((o,i)=>{
+    const mO=(eleves.reduce((s,e)=>s+e.scores[i],0)/n).toFixed(1);
+    const pO=profil(parseFloat(mO));
+    const statut=pO==="A"?"Lacune collective — SA prioritaire":pO==="B"?"En cours — consolider":"Bon niveau — approfondir";
+    obsAnalysis+=`<div class="obs-row">
+      <div class="obs-name">${o.label} — ${o.nom}</div>
+      <div class="obs-moy">${mO}/10</div>
+      <span class="obs-status s${pO}">${pO}</span>
+      <div style="font-size:10px;color:var(--muted)">${statut}</div>
+    </div>`;
+  });
+
+  /* Groupes de besoin */
+  let groupes="<h4 style=\"margin:12px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)\">Groupes de besoin</h4>";
+  ["A","B","C"].forEach(p=>{
+    const gl=eleves.filter(e=>e.profG===p);
+    if(gl.length>0){
+      groupes+=`<div class="alert info" style="margin-bottom:4px">
+        <strong>Groupe ${p} (${gl.length} élève(s))</strong> —
+        ${gl.map(e=>e.nom).join(", ")} — SA : ${SA[gl[0].saPrio]}
+      </div>`;
+    }
+  });
+
+  /* Décision */
+  const decTxt = dom==="A"?"Classe débutante — Priorité fondamentaux (marque de passage + dissociation)":
+                 dom==="B"?"Classe intermédiaire — Différenciation A/B active":
+                 "Classe avancée — Approfondissement et tutorat";
+  const dec=`<div class="decision-box d${dom}"><strong>Décision automatique :</strong> ${decTxt}</div>`;
+
+  document.getElementById("step1-content").innerHTML = cards+obsAnalysis+groupes+dec+tbl;
+}
+
+/* ================================================
+   ÉTAPE 2 — AXES
+   ================================================ */
+function renderAxes(){
+  const n = eleves.length;
+  const html = AXES.map(ax=>{
+    const obsIdx = OBS.findIndex(o=>o.id===ax.obs);
+    const pctLac = obsIdx>=0
+      ? Math.round(eleves.filter(e=>e.scores[obsIdx]<SEUILS.B).length/n*100)
+      : Math.round(Math.random()*40+20);
+    const prio = ax.id<=2?"&#9654; Recommandé":"Complémentaire";
+    return `<div class="axis-item" id="axis-item-${ax.id}">
+      <input type="checkbox" id="ax${ax.id}" onchange="toggleAxe(${ax.id},${pctLac})" ${selectedAxes.includes(ax.id)?"checked":""}>
+      <div style="flex:1">
+        <div class="axis-title">Axe ${ax.id} — ${ax.titre} <small style="font-weight:normal;color:var(--muted)">[${prio}]</small></div>
+        <div class="axis-meta">
+          Pertinence : <strong>${pctLac}%</strong> des élèves concernés ·
+          Observable lié : ${ax.obs} · SA : ${ax.sa}<br>
+          Lacune : ${ax.lacune} · Impact : ${ax.impact}
+        </div>
+        <div class="axis-bar"><div class="axis-bar-fill" style="width:${pctLac}%"></div></div>
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById("axes-list").innerHTML=html;
+  selectedAxes.forEach(id=>{
+    const item = document.getElementById("axis-item-"+id);
+    if(item) item.classList.add("selected");
+  });
+  const ok=selectedAxes.length>=3&&selectedAxes.length<=4;
+  document.getElementById("btnStep3").disabled=!ok;
+  document.getElementById("axes-alert").style.display=ok?"none":"block";
+}
+
+function toggleAxe(id, pct){
+  const cb = document.getElementById("ax"+id);
+  const item = document.getElementById("axis-item-"+id);
+  if(cb.checked){
+    if(selectedAxes.length>=4){ cb.checked=false; showAxeAlert("Maximum 4 axes atteint."); return; }
+    selectedAxes.push(id); item.classList.add("selected");
+  } else {
+    selectedAxes=selectedAxes.filter(x=>x!==id); item.classList.remove("selected");
+  }
+  saveState();
+  const ok=selectedAxes.length>=3&&selectedAxes.length<=4;
+  document.getElementById("btnStep3").disabled=!ok;
+  document.getElementById("axes-alert").style.display=ok?"none":"block";
+}
+
+function showAxeAlert(msg){ const el=document.getElementById("axes-alert"); el.textContent=msg; el.style.display="block"; }
+
+/* ================================================
+   ÉTAPE 3 — SLIDER
+   ================================================ */
+function updateSlider(){
+  const v=parseInt(document.getElementById("sliderSeances").value);
+  nbSeances=v;
+  document.getElementById("sliderVal").textContent=v+" séance(s)";
+  const nA=selectedAxes.length>=4?4:3;
+  const key=nA.toString();
+  const dist=DISTRIB[key][v];
+  const axObjs=selectedAxes.slice(0,nA).map(id=>AXES.find(a=>a.id===id));
+  let html="<strong style=\"font-family:var(--font);font-size:11px\">Cycle de "+v+" séances — "+nA+" séquences</strong><br><br>";
+  dist.forEach((ns,i)=>{
+    const ax=axObjs[i];
+    html+=`<div class="distrib-seq">
+      <span class="seq-label">Séquence ${i+1}</span>
+      <span class="seq-block">${ns} séance(s)</span>
+      <span style="font-size:10px;color:var(--muted);margin-left:4px">${ax?ax.titre.substring(0,45)+"&hellip;":""}</span>
+    </div>`;
+  });
+  document.getElementById("distribPreview").innerHTML=html;
+  saveState();
+}
+
+/* ================================================
+   ÉTAPE 4 — PLANIFICATION
+   ================================================ */
+function genererPlanification(){
+  const nA=selectedAxes.length>=4?4:3;
+  const axObjs=selectedAxes.slice(0,nA).map(id=>AXES.find(a=>a.id===id));
+  const dist=DISTRIB[nA.toString()][nbSeances];
+  let html="";
+  let seanceGlobale=1;
+
+  dist.forEach((ns,seqIdx)=>{
+    const ax=axObjs[seqIdx];
+    const obj=seqIdx===0?"Fondamentaux — tous groupes":
+              seqIdx===dist.length-1?"Consolidation B — approfondissement C":
+              "Différenciation A/B/C active";
+    html+=`<div class="seq-section">
+      <div class="seq-head">Séquence ${seqIdx+1} — ${ax.titre.substring(0,50)}&hellip;</div>
+      <div class="seq-sub">Objectif général : ${obj} · ${ns} séance(s) · SA : ${SA[ax.sa]}</div>
+      <table class="plan-table"><thead><tr>
+        <th>Séance</th><th>Axe dominant</th><th>Objectif</th>
+        <th class="td-A">Groupe A — Débutants</th>
+        <th class="td-B">Groupe B — Intermédiaires</th>
+        <th class="td-C">Groupe C — Avancés</th>
+      </tr></thead><tbody>`;
+
+    for(let s=0;s<ns;s++){
+      const isLast=s===ns-1;
+      const isVeryLast=seqIdx===dist.length-1&&isLast;
+      const objSeance=isVeryLast?"Bilan de cycle — situation officielle":
+                      s===0?"Évaluation diagnostique de l'axe":
+                      "Consolidation — régulation collective";
+      html+=`<tr>
+        <td class="td-seq">S${seanceGlobale}</td>
+        <td style="font-size:9px;font-family:var(--font)">Axe ${ax.id}</td>
+        <td style="font-size:9px">${objSeance}</td>
+        <td class="td-A"><span class="sa-chip">${ax.sa}</span><div class="plan-consigne">${ax.consA}</div><div class="plan-critere">Critère : ${ax.critA}</div></td>
+        <td class="td-B"><span class="sa-chip">${ax.sa}</span><div class="plan-consigne">${ax.consB}</div><div class="plan-critere">Critère : ${ax.critB}</div></td>
+        <td class="td-C"><span class="sa-chip">${ax.sa}</span><div class="plan-consigne">${ax.consC}</div><div class="plan-critere">Critère : ${ax.critC}</div></td>
+      </tr>`;
+      if(!isLast){
+        html+=`<tr><td colspan="6"><div class="passage-indicator">
+          <span class="pi-label">&#128203; À observer avant la séance suivante :</span>
+          ${ax.conduite}
+          <em style="display:block;margin-top:3px;color:#7a4f00">(Indicatif — décision de progression : vous)</em>
+        </div></td></tr>`;
+      }
+      seanceGlobale++;
+    }
+    html+="</tbody></table></div>";
+  });
+
+  /* Résumé */
+  const totA=eleves.filter(e=>e.profG==="A").length;
+  const dom=["A","B","C"].reduce((p,c)=>
+    eleves.filter(e=>e.profG===c).length > eleves.filter(e=>e.profG===p).length?c:p,"A");
+  html+=`<div class="cycle-summary">
+    <h3>Résumé du cycle</h3>
+    <table class="data-table" style="font-size:10px"><thead><tr>
+      <th>Séquence</th><th>Axes travaillés</th><th>Séances</th><th>Profil ciblé</th>
+    </tr></thead><tbody>
+    ${dist.map((ns,i)=>`<tr>
+      <td>Séquence ${i+1}</td>
+      <td style="font-family:var(--font);font-size:9px">Axe ${axObjs[i].id} — ${axObjs[i].titre.substring(0,35)}&hellip;</td>
+      <td>${ns}</td>
+      <td>${i===0?"A dominant":i===dist.length-1?"C horizon":"B différenciation"}</td>
+    </tr>`).join("")}
+    </tbody></table>
+    <p style="margin-top:10px;font-size:11px">
+      Ce cycle de <strong>${nbSeances} séances</strong> cible <strong>${nA} axes prioritaires</strong>.<br>
+      Profil le plus concerné : <strong>${dom}</strong> (${eleves.filter(e=>e.profG===dom).length} élève(s) — ${Math.round(eleves.filter(e=>e.profG===dom).length/eleves.length*100)}%).<br>
+      <em>Réévaluer après la séquence 2 avec une nouvelle collecte terrain.</em>
+    </p>
+  </div>`;
+
+  document.getElementById("step4-content").innerHTML=html;
+  saveState();
+  goStep(4);
+}
+
+/* ================================================
+   EXPORT CSV
+   ================================================ */
+function exportCSV(){
+  if(eleves.length===0){ alert("Analysez d'abord la classe."); return; }
+  const bom="\uFEFF";
+  const headers=["Prénom",...OBS.map(o=>o.label+" Code"),...OBS.map(o=>o.label+" Score"),
+    "Moyenne","Sur20","Rang","Profil Global","Profil Détail","Lacune 1","SA"];
+  const rows=eleves.map(e=>[
+    e.nom,
+    ...e.degs.map((d,i)=>OBS[i].codes[d]),
+    ...e.scores,
+    e.moy.toFixed(1),(e.moy*2).toFixed(1),e.rang,e.profG,
+    e.profsD.join("/"),
+    e.lacunes.length>0?`L1 - ${e.lacunes[0].obs.label} : ${e.lacunes[0].score}/10`:"Aucune",
+    e.saPrio
+  ]);
+  const csv=bom+[headers,...rows].map(r=>r.map(v=>`"${v}"`).join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+  const d=new Date().toISOString().split("T")[0];
+  a.download=`outil_v0_CR_${d}.csv`;
+  a.click();
+}
+
+/* ================================================
+   EXPORT / IMPORT SESSION (JSON)
+   ================================================ */
+function exportSession(){
+  const state = {
+    eleves: eleves,
+    selectedAxes: selectedAxes,
+    nbSeances: nbSeances,
+    rowCount: rowCount,
+    version: VERSION,
+    exportedAt: new Date().toISOString()
+  };
+  const json = JSON.stringify(state, null, 2);
+  const blob = new Blob([json], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const d = new Date().toISOString().split("T")[0];
+  a.download = `session_eps_cr_${d}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  updateSessionStatus("Session exportée");
+}
+
+function importSession(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const state = JSON.parse(e.target.result);
+      if(!state.version || !state.eleves){
+        showAlert("Fichier de session invalide","err");
+        return;
+      }
+      if(!confirm("Cela remplacera les données actuelles. Continuer ?")) return;
+      eleves = state.eleves || [];
+      selectedAxes = state.selectedAxes || [];
+      nbSeances = state.nbSeances || 6;
+      rowCount = state.rowCount || 0;
+      saveState();
+      // Reconstruire l'interface
+      document.getElementById("rowsContainer").innerHTML = "";
+      // Restaurer les lignes de saisie si nécessaire
+      if(eleves.length > 0){
+        eleves.forEach(e=>{
+          addRow({ nom:e.nom, d1:e.degs[0], d2:e.degs[1], d3:e.degs[2], d5:e.degs[3] });
+        });
+      } else {
+        addRow(); addRow(); addRow();
+      }
+      showAlert("Session restaurée avec succès","success");
+      updateSessionStatus("Session importée");
+      goStep(0);
+    } catch(err){
+      showAlert("Erreur lors de l'import: "+err.message,"err");
+    }
+  };
+  reader.readAsText(file, "UTF-8");
+  input.value = "";
+}
+
+function clearAllData(){
+  if(!confirm("ATTENTION : Cette action effacera TOUTES les données en cours.\n\nCette opération est irréversible. Confirmer ?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById("rowsContainer").innerHTML = "";
+  eleves = [];
+  selectedAxes = [];
+  rowCount = 0;
+  nbSeances = 6;
+  clearAlert();
+  addRow(); addRow(); addRow();
+  updateSessionStatus("Session réinitialisée");
+  showAlert("Nouvelle session prête","success");
+}
+
+/* ================================================
+   RESET
+   ================================================ */
+function resetAll(){
+  if(!confirm("Réinitialiser toutes les données ?")) return;
+  document.getElementById("rowsContainer").innerHTML="";
+  eleves=[]; selectedAxes=[]; rowCount=0;
+  clearAlert();
+  addRow(); addRow(); addRow();
+  saveState();
+}
+
+/* ================================================
+   INITIALISATION
+   ================================================ */
+document.addEventListener("DOMContentLoaded", function(){
+  const loaded = loadState();
+  if(loaded && eleves.length > 0){
+    // Restaurer les lignes
+    document.getElementById("rowsContainer").innerHTML = "";
+    eleves.forEach(e=>{
+      addRow({ nom:e.nom, d1:e.degs[0], d2:e.degs[1], d3:e.degs[2], d5:e.degs[3] });
+    });
+    updateSessionStatus("Session précédente restaurée");
+  } else {
+    addRow(); addRow(); addRow();
+  }
+  // Sauvegarder périodiquement
+  setInterval(saveState, 30000);
+});
+
+/* Init fallback (si DOMContentLoaded déjà passé) */
+if(document.readyState === "complete" || document.readyState === "interactive"){
+  const loaded = loadState();
+  if(!loaded || eleves.length === 0){
+    addRow(); addRow(); addRow();
+  }
+}
+
+/* ── GRILLE DI TERRAIN ─────────────── */
+function ouvrirGrilleDI() {
+  try {
+    var b64 = 'PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImZyIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9IlVURi04Ij4KPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xLjAiPgo8dGl0bGU+R3JpbGxlIFRlcnJhaW4g4oCUIENvdXJzZSBkZSBSZWxhaXMgQ1Ig4oCUIDggw4lxdWlwZXMg4oCUIEFEUDIwMjY8L3RpdGxlPgo8c3R5bGU+CiAgOnJvb3QgewogICAgLS1hOiAjRkNFQkVCOyAtLWEtYm9yZGVyOiAjZDk1MzRmOyAtLWEtdGV4dDogIzhiMWExYTsKICAgIC0tYjogI0ZBRUVEQTsgLS1iLWJvcmRlcjogI2U2YTgxNzsgLS1iLXRleHQ6ICM3YTRmMDA7CiAgICAtLWM6ICNFQUYzREU7IC0tYy1ib3JkZXI6ICM1YTllM2E7IC0tYy10ZXh0OiAjMWE1ZTBhOwogICAgLS1pbms6ICMxMTE7IC0tcnVsZTogI2JiYjsKICAgIC0taGVhZGVyLWJnOiAjMWExYTJlOyAtLWhlYWRlci10ZXh0OiAjZjBmMGYwOwogICAgLS1ibG9jay1iZzogI2ZmZjsgLS1ibG9jay1ib3JkZXI6ICMzMzM7CiAgICAtLXN0cmlwZTogI2Y3ZjdmNzsKICAgIC0tZm9udC1tYWluOiAnQ291cmllciBQcmltZScsJ0NvdXJpZXIgTmV3Jyxtb25vc3BhY2U7CiAgICAtLWZvbnQtdWk6ICdTZWdvZSBVSScsc3lzdGVtLXVpLHNhbnMtc2VyaWY7CiAgfQogICosKjo6YmVmb3JlLCo6OmFmdGVye2JveC1zaXppbmc6Ym9yZGVyLWJveDttYXJnaW46MDtwYWRkaW5nOjA7fQogIGJvZHl7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC1tYWluKTtmb250LXNpemU6MTBweDtjb2xvcjp2YXIoLS1pbmspO2JhY2tncm91bmQ6I2UwZTBlMDtwYWRkaW5nOjVtbTt9CgogIC5tYXN0ZXItaGVhZGVye2JhY2tncm91bmQ6dmFyKC0taGVhZGVyLWJnKTtjb2xvcjp2YXIoLS1oZWFkZXItdGV4dCk7cGFkZGluZzo1cHggMTBweDtkaXNwbGF5OmZsZXg7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47YWxpZ24taXRlbXM6Y2VudGVyO21hcmdpbi1ib3R0b206NXB4O2JvcmRlci1yYWRpdXM6MnB4O30KICAubWFzdGVyLWhlYWRlciAudGl0bGV7Zm9udC1zaXplOjEzcHg7Zm9udC13ZWlnaHQ6Ym9sZDtsZXR0ZXItc3BhY2luZzouMWVtO3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTt9CiAgLm1hc3Rlci1oZWFkZXIgLm1ldGF7b3BhY2l0eTouNztmb250LXNpemU6OHB4O21hcmdpbi10b3A6MnB4O30KICAuYmFkZ2UtZGl7YmFja2dyb3VuZDojZTZhODE3O2NvbG9yOiMxMTE7cGFkZGluZzozcHggOHB4O2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjlweDtib3JkZXItcmFkaXVzOjJweDtsZXR0ZXItc3BhY2luZzouMDhlbTt9CgogIC5mb3VyY2hldHRlLWJhcntkaXNwbGF5OmZsZXg7Z2FwOjVweDthbGlnbi1pdGVtczpjZW50ZXI7ZmxleC13cmFwOndyYXA7YmFja2dyb3VuZDojZmZmO2JvcmRlcjoxLjVweCBzb2xpZCAjMzMzO3BhZGRpbmc6NHB4IDEwcHg7bWFyZ2luLWJvdHRvbTo1cHg7Ym9yZGVyLXJhZGl1czoycHg7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7Zm9udC1zaXplOjguNXB4O30KICAuZm91cmNoZXR0ZS1iYXIgLmZiLXRpdGxle2ZvbnQtd2VpZ2h0OmJvbGQ7Y29sb3I6IzMzMztmb250LXNpemU6OXB4O2xldHRlci1zcGFjaW5nOi4wNWVtO21hcmdpbi1yaWdodDozcHg7fQogIC5mYi1jaGlwe2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO3BhZGRpbmc6MnB4IDZweDtib3JkZXItcmFkaXVzOjJweDtmb250LXdlaWdodDpib2xkO2ZvbnQtc2l6ZTo4cHg7fQogIC5mYi1jaGlwLmF7YmFja2dyb3VuZDp2YXIoLS1hKTtjb2xvcjp2YXIoLS1hLXRleHQpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYS1ib3JkZXIpO30KICAuZmItY2hpcC5ie2JhY2tncm91bmQ6dmFyKC0tYik7Y29sb3I6dmFyKC0tYi10ZXh0KTtib3JkZXI6MXB4IHNvbGlkIHZhcigtLWItYm9yZGVyKTt9CiAgLmZiLWNoaXAuY3tiYWNrZ3JvdW5kOnZhcigtLWMpO2NvbG9yOnZhcigtLWMtdGV4dCk7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1jLWJvcmRlcik7fQogIC5mYi1zZXB7Y29sb3I6I2NjYzttYXJnaW46MCAzcHg7fQogIC5mYi1ub3Rle2ZvbnQtc2l6ZTo3LjVweDtjb2xvcjojODg4O21hcmdpbi1sZWZ0OmF1dG87Zm9udC1zdHlsZTppdGFsaWM7fQoKICAubGVnZW5kLWJhcntkaXNwbGF5OmZsZXg7Z2FwOjZweDthbGlnbi1pdGVtczpjZW50ZXI7Zm9udC1zaXplOjlweDtmb250LWZhbWlseTp2YXIoLS1mb250LXVpKTtmbGV4LXdyYXA6d3JhcDttYXJnaW4tYm90dG9tOjVweDt9CiAgLmxlZy1sYWJlbHtmb250LXdlaWdodDpib2xkO2NvbG9yOiM1NTU7fQogIC5sZWctY2hpcHtkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtwYWRkaW5nOjJweCA2cHg7Ym9yZGVyLXJhZGl1czoycHg7Zm9udC13ZWlnaHQ6Ym9sZDtmb250LXNpemU6OC41cHg7fQogIC5sZWctY2hpcC5he2JhY2tncm91bmQ6dmFyKC0tYSk7Y29sb3I6dmFyKC0tYS10ZXh0KTtib3JkZXI6MXB4IHNvbGlkIHZhcigtLWEtYm9yZGVyKTt9CiAgLmxlZy1jaGlwLmJ7YmFja2dyb3VuZDp2YXIoLS1iKTtjb2xvcjp2YXIoLS1iLXRleHQpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYi1ib3JkZXIpO30KICAubGVnLWNoaXAuY3tiYWNrZ3JvdW5kOnZhcigtLWMpO2NvbG9yOnZhcigtLWMtdGV4dCk7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1jLWJvcmRlcik7fQogIC5ydWxlLW5vdGV7Zm9udC1zaXplOjcuNXB4O2NvbG9yOiM4ODg7bWFyZ2luLWxlZnQ6YXV0bzt9CgogIC5wYWdle2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDQsMWZyKTtnYXA6NHB4O21hcmdpbi1ib3R0b206NXB4O30KICAudGVhbS1ibG9ja3tiYWNrZ3JvdW5kOnZhcigtLWJsb2NrLWJnKTtib3JkZXI6MS41cHggc29saWQgdmFyKC0tYmxvY2stYm9yZGVyKTtib3JkZXItcmFkaXVzOjJweDtvdmVyZmxvdzpoaWRkZW47YnJlYWstaW5zaWRlOmF2b2lkO3BhZ2UtYnJlYWstaW5zaWRlOmF2b2lkO30KCiAgLnRlYW0taGVhZHtiYWNrZ3JvdW5kOnZhcigtLWhlYWRlci1iZyk7Y29sb3I6dmFyKC0taGVhZGVyLXRleHQpO2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47cGFkZGluZzozcHggNnB4O2dhcDo0cHg7fQogIC50ZWFtLW51bXtmb250LXNpemU6MTVweDtmb250LXdlaWdodDpib2xkO21pbi13aWR0aDozNnB4O30KICAudGVhbS1uYW1lLWlucHV0e2ZsZXg6MTtiYWNrZ3JvdW5kOnJnYmEoMjU1LDI1NSwyNTUsLjEyKTtib3JkZXI6bm9uZTtib3JkZXItYm90dG9tOjFweCBzb2xpZCByZ2JhKDI1NSwyNTUsMjU1LC4zNSk7Y29sb3I6I2ZmZjtmb250LWZhbWlseTp2YXIoLS1mb250LW1haW4pO2ZvbnQtc2l6ZTo5cHg7cGFkZGluZzoxcHggM3B4O291dGxpbmU6bm9uZTt9CiAgLnRlYW0tbmFtZS1pbnB1dDo6cGxhY2Vob2xkZXJ7Y29sb3I6cmdiYSgyNTUsMjU1LDI1NSwuNCk7Zm9udC1zdHlsZTppdGFsaWM7fQogIC50ZWFtLWRhdGV7Zm9udC1zaXplOjhweDtvcGFjaXR5Oi42O3doaXRlLXNwYWNlOm5vd3JhcDt9CgogIC5zZWMtbGFiZWx7YmFja2dyb3VuZDojZjBmMGYwO2JvcmRlci10b3A6MXB4IHNvbGlkIHZhcigtLXJ1bGUpO2JvcmRlci1ib3R0b206MXB4IHNvbGlkIHZhcigtLXJ1bGUpO2ZvbnQtc2l6ZTo3cHg7Zm9udC13ZWlnaHQ6Ym9sZDtsZXR0ZXItc3BhY2luZzouMWVtO3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTtjb2xvcjojNTU1O3BhZGRpbmc6MnB4IDVweDtmb250LWZhbWlseTp2YXIoLS1mb250LXVpKTt9CgogIC5kZWctZ3JvdXB7ZGlzcGxheTpmbGV4O2dhcDoycHg7anVzdGlmeS1jb250ZW50OmNlbnRlcjt9CiAgLmRlZy1idG57ZGlzcGxheTppbmxpbmUtZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OmNlbnRlcjt3aWR0aDoxOHB4O2hlaWdodDoxOHB4O2JvcmRlci1yYWRpdXM6NTAlO2JvcmRlcjoxLjVweCBzb2xpZCAjYmJiO2ZvbnQtc2l6ZTo5cHg7Zm9udC13ZWlnaHQ6Ym9sZDtjdXJzb3I6cG9pbnRlcjt0cmFuc2l0aW9uOmFsbCAuMXM7dXNlci1zZWxlY3Q6bm9uZTtiYWNrZ3JvdW5kOiNmZmY7Y29sb3I6Izg4ODtmb250LWZhbWlseTp2YXIoLS1mb250LXVpKTt9CiAgLmRlZy1idG46aG92ZXJ7Ym9yZGVyLWNvbG9yOiM1NTU7Y29sb3I6IzMzMzt9CiAgLmRlZy1idG4uc2VsLWF7YmFja2dyb3VuZDp2YXIoLS1hKTtib3JkZXItY29sb3I6dmFyKC0tYS1ib3JkZXIpO2NvbG9yOnZhcigtLWEtdGV4dCk7Ym9yZGVyLXdpZHRoOjJweDt9CiAgLmRlZy1idG4uc2VsLWJ7YmFja2dyb3VuZDp2YXIoLS1iKTtib3JkZXItY29sb3I6dmFyKC0tYi1ib3JkZXIpO2NvbG9yOnZhcigtLWItdGV4dCk7Ym9yZGVyLXdpZHRoOjJweDt9CiAgLmRlZy1idG4uc2VsLWN7YmFja2dyb3VuZDp2YXIoLS1jKTtib3JkZXItY29sb3I6dmFyKC0tYy1ib3JkZXIpO2NvbG9yOnZhcigtLWMtdGV4dCk7Ym9yZGVyLXdpZHRoOjJweDt9CgogIC5jb2xsZWN0aWYtcm93e2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7cGFkZGluZzozcHggNXB4O2dhcDo1cHg7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgI2VlZTtmb250LXNpemU6OHB4O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtdWkpO30KICAub2JzLWxhYmVse2ZvbnQtc2l6ZTo3cHg7Zm9udC13ZWlnaHQ6Ym9sZDtjb2xvcjojNDQ0O2xldHRlci1zcGFjaW5nOi4wNWVtO21pbi13aWR0aDo1MnB4O30KICAuaW5kaWNlLWJveHtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDozcHg7bWFyZ2luLWxlZnQ6YXV0bztmb250LXNpemU6N3B4O2NvbG9yOiM2NjY7fQogIC5pbmRpY2UtYm94IGlucHV0e3dpZHRoOjI4cHg7Ym9yZGVyOm5vbmU7Ym9yZGVyLWJvdHRvbToxLjVweCBzb2xpZCAjNTU1O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtbWFpbik7Zm9udC1zaXplOjlweDt0ZXh0LWFsaWduOmNlbnRlcjtiYWNrZ3JvdW5kOnRyYW5zcGFyZW50O291dGxpbmU6bm9uZTt9CgogIC5wZXJmLXNlY3Rpb257cGFkZGluZzozcHggNXB4O2JvcmRlci1ib3R0b206MXB4IHNvbGlkICNlZWU7fQogIC5wZXJmLXJvd3tkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo0cHg7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7fQogIC5wZXJmLWxhYmVse2ZvbnQtc2l6ZTo3cHg7Zm9udC13ZWlnaHQ6Ym9sZDtjb2xvcjojNDQ0O21pbi13aWR0aDo1MnB4O30KICAuY2hyb25vLWlucHV0e3dpZHRoOjM2cHg7Ym9yZGVyOm5vbmU7Ym9yZGVyLWJvdHRvbToycHggc29saWQgIzQ0NDtmb250LWZhbWlseTp2YXIoLS1mb250LW1haW4pO2ZvbnQtc2l6ZToxMXB4O2ZvbnQtd2VpZ2h0OmJvbGQ7dGV4dC1hbGlnbjpjZW50ZXI7YmFja2dyb3VuZDp0cmFuc3BhcmVudDtvdXRsaW5lOm5vbmU7cGFkZGluZzowIDFweDt9CiAgLmNocm9uby1pbnB1dDo6cGxhY2Vob2xkZXJ7Y29sb3I6I2JiYjtmb250LXNpemU6OC41cHg7Zm9udC13ZWlnaHQ6bm9ybWFsO30KICAuY2hyb25vLWZtdHtmb250LXNpemU6N3B4O2NvbG9yOiNiYmI7fQogIC5nZW5yZS10b2dnbGV7ZGlzcGxheTpmbGV4O2dhcDoycHg7fQogIC5nZW5yZS1idG57cGFkZGluZzoxcHggNXB4O2JvcmRlcjoxLjVweCBzb2xpZCAjYmJiO2JvcmRlci1yYWRpdXM6MnB4O2ZvbnQtc2l6ZTo4cHg7Zm9udC13ZWlnaHQ6Ym9sZDtjdXJzb3I6cG9pbnRlcjtiYWNrZ3JvdW5kOiNmZmY7Y29sb3I6Izk5OTtmb250LWZhbWlseTp2YXIoLS1mb250LXVpKTt0cmFuc2l0aW9uOmFsbCAuMXM7fQogIC5nZW5yZS1idG46aG92ZXJ7Ym9yZGVyLWNvbG9yOiM1NTU7Y29sb3I6IzMzMzt9CiAgLmdlbnJlLWJ0bi5hY3RpdmUtZ3tiYWNrZ3JvdW5kOiNkZGVlZmY7Ym9yZGVyLWNvbG9yOiMzMzY2YWE7Y29sb3I6IzAwMzM4ODt9CiAgLmdlbnJlLWJ0bi5hY3RpdmUtZntiYWNrZ3JvdW5kOiNmZmVlZmY7Ym9yZGVyLWNvbG9yOiM5OTMzOTk7Y29sb3I6IzY2MDA2Njt9CiAgLmxldmVsLWJhZGdle2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7bWluLXdpZHRoOjMwcHg7cGFkZGluZzoycHggNXB4O2JvcmRlci1yYWRpdXM6M3B4O2ZvbnQtc2l6ZToxMXB4O2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7Ym9yZGVyOjEuNXB4IHNvbGlkICNkZGQ7YmFja2dyb3VuZDojZjVmNWY1O2NvbG9yOiNiYmI7dHJhbnNpdGlvbjphbGwgLjJzO2xldHRlci1zcGFjaW5nOi4wNWVtO30KICAubGV2ZWwtYmFkZ2UubHZsLWF7YmFja2dyb3VuZDp2YXIoLS1hKTtib3JkZXItY29sb3I6dmFyKC0tYS1ib3JkZXIpO2NvbG9yOnZhcigtLWEtdGV4dCk7fQogIC5sZXZlbC1iYWRnZS5sdmwtYntiYWNrZ3JvdW5kOnZhcigtLWIpO2JvcmRlci1jb2xvcjp2YXIoLS1iLWJvcmRlcik7Y29sb3I6dmFyKC0tYi10ZXh0KTt9CiAgLmxldmVsLWJhZGdlLmx2bC1je2JhY2tncm91bmQ6dmFyKC0tYyk7Ym9yZGVyLWNvbG9yOnZhcigtLWMtYm9yZGVyKTtjb2xvcjp2YXIoLS1jLXRleHQpO30KCiAgLnJlbGF5ZXVycy1saXN0e3BhZGRpbmc6MnB4IDVweDt9CiAgLnItcm93e2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjRweDtwYWRkaW5nOjJweCAwO2JvcmRlci1ib3R0b206MXB4IHNvbGlkICNmMmYyZjI7fQogIC5yLXJvdzpsYXN0LWNoaWxke2JvcmRlci1ib3R0b206bm9uZTt9CiAgLnItbnVte2ZvbnQtc2l6ZTo4cHg7Zm9udC13ZWlnaHQ6Ym9sZDtjb2xvcjojYWFhO21pbi13aWR0aDoxNHB4O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtdWkpO30KICAuci1uYW1le2ZsZXg6MTtib3JkZXI6bm9uZTtib3JkZXItYm90dG9tOjFweCBkYXNoZWQgI2NjYztmb250LWZhbWlseTp2YXIoLS1mb250LW1haW4pO2ZvbnQtc2l6ZTo4LjVweDtiYWNrZ3JvdW5kOnRyYW5zcGFyZW50O291dGxpbmU6bm9uZTtwYWRkaW5nOjA7fQogIC5yLW5hbWU6OnBsYWNlaG9sZGVye2NvbG9yOiNjY2M7Zm9udC1zdHlsZTppdGFsaWM7fQoKICAuY2hhcm5pZXJlLXJvd3tkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO3BhZGRpbmc6MnB4IDVweDtnYXA6M3B4O2ZvbnQtc2l6ZTo4cHg7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgI2VlZTt9CiAgLmNoYXJuaWVyZS1yb3c6bGFzdC1jaGlsZHtib3JkZXItYm90dG9tOm5vbmU7fQogIC5jaC1sYWJlbHtmb250LXNpemU6N3B4O2NvbG9yOiM2NjY7bWluLXdpZHRoOjUwcHg7bGV0dGVyLXNwYWNpbmc6LjAyZW07fQogIC5vYnMtdGFne2ZvbnQtc2l6ZTo3cHg7Y29sb3I6I2FhYTttaW4td2lkdGg6MThweDtmb250LWZhbWlseTp2YXIoLS1mb250LW1haW4pO30KCiAgLnByb2ZpbC1mb290ZXJ7YmFja2dyb3VuZDojZjlmOWY5O2JvcmRlci10b3A6MS41cHggc29saWQgdmFyKC0tcnVsZSk7cGFkZGluZzozcHggNXB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjVweDtmb250LXNpemU6OHB4O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtdWkpO30KICAucGYtbGFiZWx7Zm9udC13ZWlnaHQ6Ym9sZDtjb2xvcjojNDQ0O2ZvbnQtc2l6ZTo3LjVweDt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7fQogIC5vYnMtZmllbGR7ZmxleDoxO2JvcmRlcjpub25lO2JvcmRlci1ib3R0b206MXB4IGRhc2hlZCAjYmJiO2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtbWFpbik7Zm9udC1zaXplOjhweDtiYWNrZ3JvdW5kOnRyYW5zcGFyZW50O291dGxpbmU6bm9uZTt9CgogIC5zY3JlZW4tY29udHJvbHN7ZGlzcGxheTpmbGV4O2dhcDo4cHg7bWFyZ2luLWJvdHRvbTo4cHg7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7ZmxleC13cmFwOndyYXA7YWxpZ24taXRlbXM6Y2VudGVyO30KICAuYnRue3BhZGRpbmc6NXB4IDEycHg7Ym9yZGVyOjEuNXB4IHNvbGlkIHZhcigtLWluayk7YmFja2dyb3VuZDojZmZmO2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtdWkpO2ZvbnQtc2l6ZToxMHB4O2ZvbnQtd2VpZ2h0OmJvbGQ7Y3Vyc29yOnBvaW50ZXI7bGV0dGVyLXNwYWNpbmc6LjA1ZW07dGV4dC10cmFuc2Zvcm06dXBwZXJjYXNlO3RyYW5zaXRpb246YWxsIC4xcztib3JkZXItcmFkaXVzOjJweDt9CiAgLmJ0bjpob3ZlcntiYWNrZ3JvdW5kOnZhcigtLWluayk7Y29sb3I6I2ZmZjt9CiAgLmJ0bi5wcmltYXJ5e2JhY2tncm91bmQ6dmFyKC0taGVhZGVyLWJnKTtjb2xvcjojZmZmO2JvcmRlci1jb2xvcjp2YXIoLS1oZWFkZXItYmcpO30KICAuYnRuLnByaW1hcnk6aG92ZXJ7YmFja2dyb3VuZDojMGYwZjIyO30KICAuYnRuLXJlc2V0e2JvcmRlci1jb2xvcjojZDk1MzRmO2NvbG9yOiNkOTUzNGY7fQogIC5idG4tcmVzZXQ6aG92ZXJ7YmFja2dyb3VuZDojZDk1MzRmO2NvbG9yOiNmZmY7fQogIC5wYWdlLWJyZWFre3BhZ2UtYnJlYWstYmVmb3JlOmFsd2F5czticmVhay1iZWZvcmU6YWx3YXlzO21hcmdpbi10b3A6OHB4O30KCiAgQG1lZGlhIHByaW50ewogICAgQHBhZ2V7c2l6ZTpBNCBsYW5kc2NhcGU7bWFyZ2luOjVtbTt9CiAgICBib2R5e2JhY2tncm91bmQ6I2ZmZjtwYWRkaW5nOjA7fQogICAgLnNjcmVlbi1jb250cm9sc3tkaXNwbGF5Om5vbmUhaW1wb3J0YW50O30KICAgIC5wYWdle2dhcDozbW07bWFyZ2luLWJvdHRvbTozbW07fQogICAgLnRlYW0tYmxvY2t7Ym9yZGVyOjFweCBzb2xpZCAjNjY2O30KICAgICp7LXdlYmtpdC1wcmludC1jb2xvci1hZGp1c3Q6ZXhhY3Q7cHJpbnQtY29sb3ItYWRqdXN0OmV4YWN0O30KICAgIC5wYWdlLWJyZWFre21hcmdpbi10b3A6MDt9CiAgfQo8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PgoKPGRpdiBjbGFzcz0ibWFzdGVyLWhlYWRlciI+CiAgPGRpdj4KICAgIDxkaXYgY2xhc3M9InRpdGxlIj5HcmlsbGUgVGVycmFpbiDCtyBDb3Vyc2UgZGUgUmVsYWlzIMK3IENSPC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJtZXRhIj5BRFAgMjAyNiDCtyBDUk1FRiBJbmV6Z2FuZSDCtyBCT1VBUkdBTkUgwrcgREkg4oCUIERpYWdub3N0aXF1ZSBJbml0aWFsIMK3IDYgc8OpYW5jZXMgwrcgUGFzIGRlIG5vdGUgLzIwPC9kaXY+CiAgPC9kaXY+CiAgPGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2dhcDo4cHg7YWxpZ24taXRlbXM6Y2VudGVyOyI+CiAgICA8ZGl2IHN0eWxlPSJ0ZXh0LWFsaWduOnJpZ2h0O2ZvbnQtc2l6ZTo4cHg7b3BhY2l0eTouNjsiPgogICAgICA8ZGl2PkRhdGUgOiBfX19fX19fX19fX19fX188L2Rpdj4KICAgICAgPGRpdj5PYnNlcnZhdGV1ciA6IF9fX19fX19fX19fX19fXzwvZGl2PgogICAgPC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJiYWRnZS1kaSI+REkgwrcgOCDDiVFVSVBFUzwvZGl2PgogIDwvZGl2Pgo8L2Rpdj4KCjwhLS0gRk9VUkNIRVRURSBSw4lGw4lSRU5DRSAtLT4KPGRpdiBjbGFzcz0iZm91cmNoZXR0ZS1iYXIiPgogIDxzcGFuIGNsYXNzPSJmYi10aXRsZSI+4o+xIEZPVVJDSEVUVEUgNMOXNTBtPC9zcGFuPgogIDxzcGFuIHN0eWxlPSJmb250LXNpemU6OHB4O2ZvbnQtd2VpZ2h0OmJvbGQ7Y29sb3I6IzMzNjZhYTsiPkdBUsOHT05TPC9zcGFuPgogIDxzcGFuIGNsYXNzPSJmYi1jaGlwIGMiPkMgJm5ic3A74omkIDI4IjU8L3NwYW4+CiAgPHNwYW4gY2xhc3M9ImZiLWNoaXAgYiI+QiAmbmJzcDsyOCI2IOKAkyAzNiIwPC9zcGFuPgogIDxzcGFuIGNsYXNzPSJmYi1jaGlwIGEiPkEgJm5ic3A7Jmd0OyAzNiIwPC9zcGFuPgogIDxzcGFuIGNsYXNzPSJmYi1zZXAiPuKUgjwvc3Bhbj4KICA8c3BhbiBzdHlsZT0iZm9udC1zaXplOjhweDtmb250LXdlaWdodDpib2xkO2NvbG9yOiM5OTMzOTk7Ij5GSUxMRVM8L3NwYW4+CiAgPHNwYW4gY2xhc3M9ImZiLWNoaXAgYyI+QyAmbmJzcDviiaQgMzMiMDwvc3Bhbj4KICA8c3BhbiBjbGFzcz0iZmItY2hpcCBiIj5CICZuYnNwOzMzIjEg4oCTIDQyIjA8L3NwYW4+CiAgPHNwYW4gY2xhc3M9ImZiLWNoaXAgYSI+QSAmbmJzcDsmZ3Q7IDQyIjA8L3NwYW4+CiAgPHNwYW4gY2xhc3M9ImZiLW5vdGUiPlRhcGV6IGxlIGNocm9ubyArIGdlbnJlIOKGkiBuaXZlYXUgcydhZmZpY2hlIHNldWw8L3NwYW4+CjwvZGl2PgoKPGRpdiBjbGFzcz0ibGVnZW5kLWJhciI+CiAgPHNwYW4gY2xhc3M9ImxlZy1sYWJlbCI+REVHUsOJUyDihpI8L3NwYW4+CiAgPHNwYW4gY2xhc3M9ImxlZy1jaGlwIGEiPkEg4oCUIETDqWJ1dGFudDwvc3Bhbj4KICA8c3BhbiBjbGFzcz0ibGVnLWNoaXAgYiI+QiDigJQgRW4gY29uc3RydWN0aW9uPC9zcGFuPgogIDxzcGFuIGNsYXNzPSJsZWctY2hpcCBjIj5DIOKAlCBNYcOudHJpc8OpPC9zcGFuPgogIDxzcGFuIHN0eWxlPSJjb2xvcjojY2NjOyI+4pSCPC9zcGFuPgogIDxzcGFuIHN0eWxlPSJmb250LXNpemU6OHB4O2NvbG9yOiM1NTU7Ij5PQlMtMDEgUUMgwrcgQ29sbGVjdGlmICZuYnNwO8K3Jm5ic3A7IE9CUy0wMiDCtyBQZXJmIGF1dG8gJm5ic3A7wrcmbmJzcDsgT0JTLTAzIFFUIMK3IFRyYW5zbWlzc2lvbiAmbmJzcDvCtyZuYnNwOyBPQlMtMDUgQVYgwrcgVml0ZXNzZXM8L3NwYW4+CiAgPHNwYW4gY2xhc3M9InJ1bGUtbm90ZSI+4pqRIDEgY29kZS9jYXNlIMK3IERvdXRlIOKGkiAiPyIgwrcgU3R5bG8gbm9pcjwvc3Bhbj4KPC9kaXY+Cgo8ZGl2IGNsYXNzPSJzY3JlZW4tY29udHJvbHMiPgogIDxidXR0b24gY2xhc3M9ImJ0biBwcmltYXJ5IiBvbmNsaWNrPSJ3aW5kb3cucHJpbnQoKSI+8J+WqCBJbXByaW1lciDCtyBBNCBQYXlzYWdlPC9idXR0b24+CiAgPGJ1dHRvbiBjbGFzcz0iYnRuIGJ0bi1yZXNldCIgb25jbGljaz0icmVzZXRBbGwoKSI+4oa6IFLDqWluaXRpYWxpc2VyPC9idXR0b24+CiAgPHNwYW4gc3R5bGU9ImZvbnQtc2l6ZTo5cHg7Y29sb3I6Izg4ODttYXJnaW4tbGVmdDphdXRvOyI+Q2hyb25vIOKGkiBuaXZlYXUgYXV0b21hdGlxdWUgwrcgQ2xpcXVleiBBwrdCwrdDIHBvdXIgbGVzIG9ic2VydmFibGVzIHF1YWxpdGF0aWZzPC9zcGFuPgo8L2Rpdj4KCjxkaXYgY2xhc3M9InBhZ2UiIGlkPSJwYWdlMSI+PC9kaXY+CjxkaXYgY2xhc3M9InBhZ2UgcGFnZS1icmVhayIgaWQ9InBhZ2UyIj48L2Rpdj4KCjxzY3JpcHQ+Ci8vIOKUgOKUgCBGT1VSQ0hFVFRFUyBEw4lGSU5JRVMgUEFSIEwnSUEg4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSACi8vIERpc3RhbmNlIDogNCDDlyA1MCBtIMK3IENvbGzDqGdlL0x5Y8OpZSBNYXJvYyDCtyBESSBTMQovLyBHYXLDp29ucyA6IEMg4omkMjgiNSAgwrcgIEIgMjgiNuKAkzM2IjAgIMK3ICBBID4zNiIwCi8vIEZpbGxlcyAgOiBDIOKJpDMzIjAgIMK3ICBCIDMzIjHigJM0MiIwICDCtyAgQSA+NDIiMApjb25zdCBTRVVJTFMgPSB7CiAgRzogeyBDOiAyOC41LCBCOiAzNi4wIH0sCiAgRjogeyBDOiAzMy4wLCBCOiA0Mi4wIH0KfTsKCmZ1bmN0aW9uIHBhcnNlY2hyb25vKHMpIHsKICAvLyBBY2NlcHRlIDogMjgiNSDCtyAyOC41IMK3IDI4LDUKICBjb25zdCBjbGVhbiA9IHMudHJpbSgpLnJlcGxhY2UoJywnLCcuJykucmVwbGFjZSgnIicsJy4nKTsKICBjb25zdCB2ID0gcGFyc2VGbG9hdChjbGVhbik7CiAgcmV0dXJuIGlzTmFOKHYpIHx8IHYgPD0gMCA/IG51bGwgOiB2Owp9CgpmdW5jdGlvbiBjYWxjTml2ZWF1KGNocm9ub1N0ciwgZ2VucmUpIHsKICBjb25zdCB2ID0gcGFyc2VjaHJvbm8oY2hyb25vU3RyKTsKICBpZiAodiA9PT0gbnVsbCB8fCAhZ2VucmUpIHJldHVybiBudWxsOwogIGNvbnN0IHMgPSBTRVVJTFNbZ2VucmVdOwogIHJldHVybiB2IDw9IHMuQyA/ICdjJyA6IHYgPD0gcy5CID8gJ2InIDogJ2EnOwp9CgpmdW5jdGlvbiB1cGRhdGVOaXZlYXUoaWQpIHsKICBjb25zdCBibG9jayA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdiJyArIGlkKTsKICBjb25zdCBjaSA9IGJsb2NrLnF1ZXJ5U2VsZWN0b3IoJy5jaHJvbm8taW5wdXQnKTsKICBjb25zdCBiYWRnZSA9IGJsb2NrLnF1ZXJ5U2VsZWN0b3IoJy5sZXZlbC1iYWRnZScpOwogIGNvbnN0IGdCdG4gPSBibG9jay5xdWVyeVNlbGVjdG9yKCcuZ2VucmUtYnRuLmFjdGl2ZS1nJyk7CiAgY29uc3QgZkJ0biA9IGJsb2NrLnF1ZXJ5U2VsZWN0b3IoJy5nZW5yZS1idG4uYWN0aXZlLWYnKTsKICBjb25zdCBnZW5yZSA9IGdCdG4gPyAnRycgOiBmQnRuID8gJ0YnIDogbnVsbDsKICBjb25zdCBuaXYgPSBjYWxjTml2ZWF1KGNpLnZhbHVlLCBnZW5yZSk7CiAgYmFkZ2UuY2xhc3NOYW1lID0gJ2xldmVsLWJhZGdlJyArIChuaXYgPyAnIGx2bC0nICsgbml2IDogJycpOwogIGJhZGdlLnRleHRDb250ZW50ID0gbml2ID8gbml2LnRvVXBwZXJDYXNlKCkgOiAn4oCUJzsKfQoKZnVuY3Rpb24gc2V0R2VucmUoYnRuLCBpZCwgZykgewogIGNvbnN0IGJsb2NrID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2InICsgaWQpOwogIGJsb2NrLnF1ZXJ5U2VsZWN0b3JBbGwoJy5nZW5yZS1idG4nKS5mb3JFYWNoKGIgPT4gYi5jbGFzc05hbWUgPSAnZ2VucmUtYnRuJyk7CiAgYnRuLmNsYXNzTGlzdC5hZGQoZyA9PT0gJ0cnID8gJ2FjdGl2ZS1nJyA6ICdhY3RpdmUtZicpOwogIHVwZGF0ZU5pdmVhdShpZCk7Cn0KCmZ1bmN0aW9uIHRvZ2dsZShidG4sIGRlZykgewogIGNvbnN0IGdycCA9IGJ0bi5jbG9zZXN0KCcuZGVnLWdyb3VwJyk7CiAgY29uc3Qgd2FzID0gYnRuLmNsYXNzTGlzdC5jb250YWlucygnc2VsLScgKyBkZWcpOwogIGdycC5xdWVyeVNlbGVjdG9yQWxsKCcuZGVnLWJ0bicpLmZvckVhY2goYiA9PiBiLmNsYXNzTmFtZSA9ICdkZWctYnRuJyk7CiAgaWYgKCF3YXMpIGJ0bi5jbGFzc0xpc3QuYWRkKCdzZWwtJyArIGRlZyk7Cn0KCmZ1bmN0aW9uIGRnKG9icykgewogIHJldHVybiBgPGRpdiBjbGFzcz0iZGVnLWdyb3VwIj4KICAgIDxkaXYgY2xhc3M9ImRlZy1idG4iIG9uY2xpY2s9InRvZ2dsZSh0aGlzLCdhJykiIHRpdGxlPSIke29ic33iiJIiPkE8L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImRlZy1idG4iIG9uY2xpY2s9InRvZ2dsZSh0aGlzLCdiJykiIHRpdGxlPSIke29ic31+Ij5CPC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJkZWctYnRuIiBvbmNsaWNrPSJ0b2dnbGUodGhpcywnYycpIiB0aXRsZT0iJHtvYnN9KyI+QzwvZGl2PgogIDwvZGl2PmA7Cn0KCmZ1bmN0aW9uIGJ1aWxkQmxvY2soaWQpIHsKICBjb25zdCBkaXYgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdkaXYnKTsKICBkaXYuY2xhc3NOYW1lID0gJ3RlYW0tYmxvY2snOwogIGRpdi5pZCA9ICdiJyArIGlkOwogIGRpdi5pbm5lckhUTUwgPSBgCiAgPGRpdiBjbGFzcz0idGVhbS1oZWFkIj4KICAgIDxzcGFuIGNsYXNzPSJ0ZWFtLW51bSI+w4lRICR7aWR9PC9zcGFuPgogICAgPGlucHV0IGNsYXNzPSJ0ZWFtLW5hbWUtaW5wdXQiIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSJOb20gZGUgbCfDqXF1aXBlLi4uIj4KICAgIDxzcGFuIGNsYXNzPSJ0ZWFtLWRhdGUiPlPDqWFuY2UgOiZuYnNwO19fXzwvc3Bhbj4KICA8L2Rpdj4KCiAgPGRpdiBjbGFzcz0ic2VjLWxhYmVsIj5PQlMtMDEgwrcgUXVhbGl0w6kgY29sbGVjdGl2ZSBkdSByZWxhaXM8L2Rpdj4KICA8ZGl2IGNsYXNzPSJjb2xsZWN0aWYtcm93Ij4KICAgIDxzcGFuIGNsYXNzPSJvYnMtbGFiZWwiPlFDIEdMT0JBTDwvc3Bhbj4KICAgICR7ZGcoJ1FDJyl9CiAgICA8ZGl2IGNsYXNzPSJpbmRpY2UtYm94Ij48c3Bhbj5JbmRpY2U8L3NwYW4+PGlucHV0IHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSIwLDAiPjwvZGl2PgogIDwvZGl2PgoKICA8ZGl2IGNsYXNzPSJzZWMtbGFiZWwiPk9CUy0wMiDCtyBQZXJmb3JtYW5jZSDDqXF1aXBlIOKAlCBuaXZlYXUgYXV0b21hdGlxdWU8L2Rpdj4KICA8ZGl2IGNsYXNzPSJwZXJmLXNlY3Rpb24iPgogICAgPGRpdiBjbGFzcz0icGVyZi1yb3ciPgogICAgICA8c3BhbiBjbGFzcz0icGVyZi1sYWJlbCI+Q0hST05PIMOJUTwvc3Bhbj4KICAgICAgPGlucHV0IGNsYXNzPSJjaHJvbm8taW5wdXQiIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSdfXyJfXycgb25pbnB1dD0idXBkYXRlTml2ZWF1KCcke2lkfScpIj4KICAgICAgPHNwYW4gY2xhc3M9ImNocm9uby1mbXQiPmV4Jm5ic3A7MjgiNTwvc3Bhbj4KICAgICAgPGRpdiBjbGFzcz0iZ2VucmUtdG9nZ2xlIj4KICAgICAgICA8YnV0dG9uIGNsYXNzPSJnZW5yZS1idG4iIG9uY2xpY2s9InNldEdlbnJlKHRoaXMsJyR7aWR9JywnRycpIj5HPC9idXR0b24+CiAgICAgICAgPGJ1dHRvbiBjbGFzcz0iZ2VucmUtYnRuIiBvbmNsaWNrPSJzZXRHZW5yZSh0aGlzLCcke2lkfScsJ0YnKSI+RjwvYnV0dG9uPgogICAgICA8L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0ibGV2ZWwtYmFkZ2UiPuKAlDwvZGl2PgogICAgPC9kaXY+CiAgPC9kaXY+CgogIDxkaXYgY2xhc3M9InNlYy1sYWJlbCI+UmVsYXlldXJzPC9kaXY+CiAgPGRpdiBjbGFzcz0icmVsYXlldXJzLWxpc3QiPgogICAgPGRpdiBjbGFzcz0ici1yb3ciPjxzcGFuIGNsYXNzPSJyLW51bSI+UjE8L3NwYW4+PGlucHV0IGNsYXNzPSJyLW5hbWUiIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSJOb20uLi4iPjwvZGl2PgogICAgPGRpdiBjbGFzcz0ici1yb3ciPjxzcGFuIGNsYXNzPSJyLW51bSI+UjI8L3NwYW4+PGlucHV0IGNsYXNzPSJyLW5hbWUiIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSJOb20uLi4iPjwvZGl2PgogICAgPGRpdiBjbGFzcz0ici1yb3ciPjxzcGFuIGNsYXNzPSJyLW51bSI+UjM8L3NwYW4+PGlucHV0IGNsYXNzPSJyLW5hbWUiIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSJOb20uLi4iPjwvZGl2PgogICAgPGRpdiBjbGFzcz0ici1yb3ciPjxzcGFuIGNsYXNzPSJyLW51bSI+UjQ8L3NwYW4+PGlucHV0IGNsYXNzPSJyLW5hbWUiIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSJOb20uLi4iPjwvZGl2PgogIDwvZGl2PgoKICA8ZGl2IGNsYXNzPSJzZWMtbGFiZWwiPk9CUy0wMyBUcmFuc21pc3Npb24gwrcgT0JTLTA1IFZpdGVzc2VzPC9kaXY+CiAgPGRpdiBjbGFzcz0iY2hhcm5pZXJlLXJvdyI+CiAgICA8c3BhbiBjbGFzcz0iY2gtbGFiZWwiPkNoMSDCtyBSMeKGklIyPC9zcGFuPgogICAgPHNwYW4gY2xhc3M9Im9icy10YWciPlFUPC9zcGFuPiR7ZGcoJ1FUJyl9CiAgICA8c3BhbiBzdHlsZT0iY29sb3I6I2UwZTBlMDttYXJnaW46MCAycHg7Ij7ilII8L3NwYW4+CiAgICA8c3BhbiBjbGFzcz0ib2JzLXRhZyI+QVY8L3NwYW4+JHtkZygnQVYnKX0KICA8L2Rpdj4KICA8ZGl2IGNsYXNzPSJjaGFybmllcmUtcm93Ij4KICAgIDxzcGFuIGNsYXNzPSJjaC1sYWJlbCI+Q2gyIMK3IFIy4oaSUjM8L3NwYW4+CiAgICA8c3BhbiBjbGFzcz0ib2JzLXRhZyI+UVQ8L3NwYW4+JHtkZygnUVQnKX0KICAgIDxzcGFuIHN0eWxlPSJjb2xvcjojZTBlMGUwO21hcmdpbjowIDJweDsiPuKUgjwvc3Bhbj4KICAgIDxzcGFuIGNsYXNzPSJvYnMtdGFnIj5BVjwvc3Bhbj4ke2RnKCdBVicpfQogIDwvZGl2PgogIDxkaXYgY2xhc3M9ImNoYXJuaWVyZS1yb3ciPgogICAgPHNwYW4gY2xhc3M9ImNoLWxhYmVsIj5DaDMgwrcgUjPihpJSNDwvc3Bhbj4KICAgIDxzcGFuIGNsYXNzPSJvYnMtdGFnIj5RVDwvc3Bhbj4ke2RnKCdRVCcpfQogICAgPHNwYW4gc3R5bGU9ImNvbG9yOiNlMGUwZTA7bWFyZ2luOjAgMnB4OyI+4pSCPC9zcGFuPgogICAgPHNwYW4gY2xhc3M9Im9icy10YWciPkFWPC9zcGFuPiR7ZGcoJ0FWJyl9CiAgPC9kaXY+CgogIDxkaXYgY2xhc3M9InByb2ZpbC1mb290ZXIiPgogICAgPHNwYW4gY2xhc3M9InBmLWxhYmVsIj5Qcm9maWwgw4lRPC9zcGFuPgogICAgJHtkZygnUFJPRklMJyl9CiAgICA8aW5wdXQgY2xhc3M9Im9icy1maWVsZCIgdHlwZT0idGV4dCIgcGxhY2Vob2xkZXI9Ik9ic2VydmF0aW9ucyBsaWJyZXMuLi4iPgogIDwvZGl2PmA7CiAgcmV0dXJuIGRpdjsKfQoKY29uc3QgcDEgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgncGFnZTEnKTsKY29uc3QgcDIgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgncGFnZTInKTsKWycwMScsJzAyJywnMDMnLCcwNCddLmZvckVhY2gobiA9PiBwMS5hcHBlbmRDaGlsZChidWlsZEJsb2NrKG4pKSk7ClsnMDUnLCcwNicsJzA3JywnMDgnXS5mb3JFYWNoKG4gPT4gcDIuYXBwZW5kQ2hpbGQoYnVpbGRCbG9jayhuKSkpOwoKZnVuY3Rpb24gcmVzZXRBbGwoKSB7CiAgaWYgKCFjb25maXJtKCdSw6lpbml0aWFsaXNlciB0b3V0ZXMgbGVzIHNhaXNpZXMgPycpKSByZXR1cm47CiAgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnLmRlZy1idG4nKS5mb3JFYWNoKGIgPT4gYi5jbGFzc05hbWUgPSAnZGVnLWJ0bicpOwogIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJ2lucHV0W3R5cGU9InRleHQiXScpLmZvckVhY2goaSA9PiBpLnZhbHVlID0gJycpOwogIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJy5nZW5yZS1idG4nKS5mb3JFYWNoKGIgPT4gYi5jbGFzc05hbWUgPSAnZ2VucmUtYnRuJyk7CiAgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnLmxldmVsLWJhZGdlJykuZm9yRWFjaChiID0+IHsKICAgIGIuY2xhc3NOYW1lID0gJ2xldmVsLWJhZGdlJzsgYi50ZXh0Q29udGVudCA9ICfigJQnOwogIH0pOwp9Cjwvc2NyaXB0Pgo8L2JvZHk+CjwvaHRtbD4K';
+    var bin = atob(b64);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) { bytes[i] = bin.charCodeAt(i); }
+    var blob = new Blob([bytes], { type: 'text/html; charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var win = window.open(url, '_blank');
+    if (!win) {
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'GrilleTerrain_DI_CR_8eq_ADP2026.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    setTimeout(function() { URL.revokeObjectURL(url); }, 120000);
+  } catch(e) {
+    alert('Erreur ouverture grille : ' + e.message);
+  }
+}
+
+</script>
+</body>
+</html>
