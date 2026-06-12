@@ -4,7 +4,7 @@
 
 ## Identité du groupe
 - **Code équipe** : COLL1_EQ_10
-- **Code projet** : DI-CREL
+- **Code projet** : DI-REL
 - **APS** : COURSE RELAIS
 - **Famille** : DI
 
