@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grille Terrain — Course de Relais CR — 8 Équipes — ADP2026</title>
+<style>
+  /* ─── VARIABLES ─────────────────────────────────────── */
+  :root {
+    --a: #FCEBEB; --a-border: #d9534f; --a-text: #8b1a1a;
+    --b: #FAEEDA; --b-border: #e6a817; --b-text: #7a4f00;
+    --c: #EAF3DE; --c-border: #5a9e3a; --c-text: #1a5e0a;
+    --ink: #111;
+    --rule: #bbb;
+    --header-bg: #1a1a2e;
+    --header-text: #f0f0f0;
+    --block-bg: #fff;
+    --block-border: #333;
+    --stripe: #f7f7f7;
+    --font-main: 'Courier Prime', 'Courier New', monospace;
+    --font-ui: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  /* ─── RESET ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-main);
+    font-size: 10px;
+    color: var(--ink);
+    background: #e8e8e8;
+    padding: 6mm;
+  }
+
+  /* ─── MASTER HEADER ─────────────────────────────────── */
+  .master-header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 6px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    border-radius: 2px;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+  }
+  .master-header .title {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .master-header .meta { opacity: 0.75; font-size: 8px; margin-top: 2px; }
+  .master-header .badge-di {
+    background: #e6a817;
+    color: #111;
+    padding: 3px 8px;
+    font-weight: bold;
+    font-size: 9px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ─── LEGEND BAR ────────────────────────────────────── */
+  .legend-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    align-items: center;
+    font-size: 9px;
+    font-family: var(--font-ui);
+    flex-wrap: wrap;
+  }
+  .legend-bar .leg-label { font-weight: bold; margin-right: 4px; color: #555; }
+  .leg-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: bold;
+    font-size: 9px;
+  }
+  .leg-chip.a { background: var(--a); color: var(--a-text); border: 1px solid var(--a-border); }
+  .leg-chip.b { background: var(--b); color: var(--b-text); border: 1px solid var(--b-border); }
+  .leg-chip.c { background: var(--c); color: var(--c-text); border: 1px solid var(--c-border); }
+  .legend-bar .sep { color: #ccc; }
+  .legend-bar .rule-note { font-size: 8px; color: #888; margin-left: auto; }
+
+  /* ─── PAGES ─────────────────────────────────────────── */
+  .page {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 5px;
+    margin-bottom: 6px;
+    background: #e8e8e8;
+  }
+
+  /* ─── TEAM BLOCK ────────────────────────────────────── */
+  .team-block {
+    background: var(--block-bg);
+    border: 1.5px solid var(--block-border);
+    border-radius: 2px;
+    overflow: hidden;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* team header */
+  .team-head {
+    background: var(--header-bg);
+    color: var(--header-text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3px 6px;
+    gap: 4px;
+  }
+  .team-num {
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    min-width: 40px;
+  }
+  .team-name-input {
+    flex: 1;
+    background: rgba(255,255,255,0.12);
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.35);
+    color: #fff;
+    font-family: var(--font-main);
+    font-size: 9px;
+    padding: 1px 3px;
+    outline: none;
+  }
+  .team-name-input::placeholder { color: rgba(255,255,255,0.4); font-style: italic; }
+  .team-date {
+    font-size: 8px;
+    opacity: 0.6;
+    white-space: nowrap;
+  }
+
+  /* section label */
+  .sec-label {
+    background: #f0f0f0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    font-size: 7.5px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #555;
+    padding: 2px 5px;
+    font-family: var(--font-ui);
+  }
+
+  /* ─── OBSERVABLES TABLE ─────────────────────────────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9px;
+  }
+  th, td {
+    padding: 2px 3px;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: middle;
+    text-align: left;
+    white-space: nowrap;
+  }
+  th {
+    background: #f5f5f5;
+    font-size: 7.5px;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #666;
+    font-family: var(--font-ui);
+    text-align: center;
+    border-bottom: 1.5px solid var(--rule);
+  }
+  tr:nth-child(even) td { background: var(--stripe); }
+  td.rname {
+    font-size: 8.5px;
+    min-width: 40px;
+  }
+  td input.name-field {
+    width: 100%;
+    border: none;
+    border-bottom: 1px dashed #bbb;
+    font-family: var(--font-main);
+    font-size: 8.5px;
+    background: transparent;
+    outline: none;
+    padding: 0;
+  }
+  td input.chrono-field {
+    width: 32px;
+    border: none;
+    border-bottom: 1.5px solid #555;
+    font-family: var(--font-main);
+    font-size: 9px;
+    font-weight: bold;
+    background: transparent;
+    text-align: center;
+    outline: none;
+    padding: 0 1px;
+  }
+  td input.chrono-field::placeholder { color: #bbb; font-size: 8px; }
+
+  /* ─── DEGREE SELECTOR ───────────────────────────────── */
+  .deg-group {
+    display: flex;
+    gap: 2px;
+    justify-content: center;
+  }
+  .deg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid #bbb;
+    font-size: 9px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    background: #fff;
+    color: #888;
+    font-family: var(--font-ui);
+  }
+  .deg-btn:hover { border-color: #555; color: #333; }
+  .deg-btn.sel-a { background: var(--a); border-color: var(--a-border); color: var(--a-text); border-width: 2px; }
+  .deg-btn.sel-b { background: var(--b); border-color: var(--b-border); color: var(--b-text); border-width: 2px; }
+  .deg-btn.sel-c { background: var(--c); border-color: var(--c-border); color: var(--c-text); border-width: 2px; }
+
+  /* ─── CHARNIÈRES ────────────────────────────────────── */
+  .charniere-row {
+    display: flex;
+    align-items: center;
+    padding: 2px 5px;
+    gap: 4px;
+    font-size: 8px;
+    font-family: var(--font-ui);
+    border-bottom: 1px solid #eee;
+  }
+  .charniere-row:last-child { border-bottom: none; }
+  .ch-label {
+    font-size: 7.5px;
+    color: #666;
+    min-width: 52px;
+    letter-spacing: 0.03em;
+  }
+  .obs-tag {
+    font-size: 7px;
+    color: #999;
+    letter-spacing: 0.05em;
+    min-width: 24px;
+    font-family: var(--font-main);
+  }
+
+  /* ─── COLLECTIF ROW ─────────────────────────────────── */
+  .collectif-row {
+    display: flex;
+    align-items: center;
+    padding: 3px 5px;
+    gap: 6px;
+    border-bottom: 1px solid #eee;
+    font-size: 8px;
+    font-family: var(--font-ui);
+  }
+  .obs-label {
+    font-size: 7.5px;
+    font-weight: bold;
+    color: #444;
+    letter-spacing: 0.05em;
+    min-width: 60px;
+  }
+  .indice-box {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+    font-size: 7.5px;
+    color: #666;
+  }
+  .indice-box input {
+    width: 34px;
+    border: none;
+    border-bottom: 1.5px solid #555;
+    font-family: var(--font-main);
+    font-size: 9px;
+    text-align: center;
+    background: transparent;
+    outline: none;
+  }
+
+  /* ─── PROFIL FOOTER ─────────────────────────────────── */
+  .profil-footer {
+    background: #f9f9f9;
+    border-top: 1.5px solid var(--rule);
+    padding: 3px 5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 8px;
+    font-family: var(--font-ui);
+  }
+  .profil-footer .pf-label {
+    font-weight: bold;
+    color: #444;
+    letter-spacing: 0.05em;
+    font-size: 8px;
+    text-transform: uppercase;
+  }
+  .profil-footer .obs-field {
+    flex: 1;
+    border: none;
+    border-bottom: 1px dashed #bbb;
+    font-family: var(--font-main);
+    font-size: 8px;
+    background: transparent;
+    outline: none;
+  }
+
+  /* ─── PAGE BREAK ────────────────────────────────────── */
+  .page-break {
+    page-break-before: always;
+    break-before: always;
+    margin-top: 10px;
+  }
+
+  /* ─── SCREEN CONTROLS ───────────────────────────────── */
+  .screen-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-family: var(--font-ui);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    padding: 5px 12px;
+    border: 1.5px solid var(--ink);
+    background: #fff;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: all 0.1s;
+    border-radius: 2px;
+  }
+  .btn:hover { background: var(--ink); color: #fff; }
+  .btn.primary { background: var(--header-bg); color: #fff; border-color: var(--header-bg); }
+  .btn.primary:hover { background: #0f0f22; }
+  .btn-reset { border-color: #d9534f; color: #d9534f; }
+  .btn-reset:hover { background: #d9534f; color: #fff; }
+  .screen-hint { font-size: 9px; color: #888; margin-left: auto; }
+
+  /* ─── PRINT OVERRIDES ───────────────────────────────── */
+  @media print {
+    @page { size: A4 landscape; margin: 6mm; }
+    body { background: #fff; padding: 0; font-size: 9px; }
+    .screen-controls, .screen-hint { display: none !important; }
+    .page { gap: 3mm; margin-bottom: 3mm; }
+    .team-block { border: 1px solid #666; }
+    .deg-btn { border: 1.5px solid #aaa; width: 16px; height: 16px; font-size: 8px; }
+    .deg-btn.sel-a, .deg-btn.sel-b, .deg-btn.sel-c {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .master-header, .team-head, .sec-label, .profil-footer,
+    .collectif-row, .charniere-row, th, td {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .legend-bar { margin-bottom: 3mm; }
+    .page-break { margin-top: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── MASTER HEADER ──────────────────────────────────── -->
+<div class="master-header">
+  <div>
+    <div class="title">Grille Terrain · Course de Relais · CR</div>
+    <div class="meta">ADP 2026 · CRMEF Inezgane · BOUARGANE · DI — Diagnostique Initial · 6 séances · Pas de note /20</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div style="text-align:right;font-size:8px;opacity:0.6;">
+      <div>Date : _______________</div>
+      <div>Observateur : _______________</div>
+    </div>
+    <div class="badge-di">DI · 8 ÉQUIPES</div>
+  </div>
+</div>
+
+<!-- ─── LÉGENDE ───────────────────────────────────────── -->
+<div class="legend-bar">
+  <span class="leg-label">DEGRÉS →</span>
+  <span class="leg-chip a">A — Débutant absolu</span>
+  <span class="leg-chip b">B — En construction</span>
+  <span class="leg-chip c">C — Maîtrisé</span>
+  <span class="sep">│</span>
+  <span style="font-size:8px;color:#555;">OBS-01 QC · Collectif &nbsp;·&nbsp; OBS-02 PI · Perf 50m &nbsp;·&nbsp; OBS-03 QT · Transmission &nbsp;·&nbsp; OBS-05 AV · Vitesses</span>
+  <span class="rule-note">⚑ 1 seul code/case · Doute → "?" · Stylo noir · Chrono format : 10"2</span>
+</div>
+
+<!-- ─── SCREEN CONTROLS ────────────────────────────────── -->
+<div class="screen-controls">
+  <button class="btn primary" onclick="window.print()">🖨 Imprimer · A4 Paysage</button>
+  <button class="btn btn-reset" onclick="resetAll()">↺ Réinitialiser</button>
+  <span class="screen-hint">Cliquez sur A · B · C pour sélectionner · Cliquez à nouveau pour désélectionner</span>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 1 — ÉQUIPES 01 à 04
+════════════════════════════════════════════════════════ -->
+<div class="page" id="page1">
+
+  <!-- ÉQUIPE 01 -->
+  <div class="team-block" id="block-01">
+    <div class="team-head">
+      <span class="team-num">ÉQ 01</span>
+      <input class="team-name-input" type="text" placeholder="Nom de l'équipe...">
+      <span class="team-date">Séance : ___</span>
+    </div>
+
+    <!-- OBS-01 COLLECTIF -->
+    <div class="sec-label">OBS-01 · Qualité collective du relais</div>
+    <div class="collectif-row">
+      <span class="obs-label">RELAIS GLOBAL</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')" title="QC− Discontinu">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')" title="QC~ Coordonné">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')" title="QC+ Fluide">C</div>
+      </div>
+      <div class="indice-box">
+        <span>Indice</span>
+        <input type="text" placeholder="0,0">
+      </div>
+    </div>
+
+    <!-- OBS-02 04 06 PAR RELAYEUR -->
+    <div class="sec-label">OBS-02 · Performance individuelle 50m</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align:left;">Relayeur</th>
+          <th>Chrono</th>
+          <th>PI</th>
+          <th>RM</th>
+          <th>RS</th>
+        </tr>
+      </thead>
+      <tbody id="rows-01"></tbody>
+    </table>
+
+    <!-- OBS-03 05 PAR CHARNIÈRE -->
+    <div class="sec-label">OBS-03 Transmission · OBS-05 Vitesses</div>
+    <div id="ch-01"></div>
+
+    <!-- PROFIL -->
+    <div class="profil-footer">
+      <span class="pf-label">Profil ÉQ</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')" title="Profil A">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')" title="Profil B">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')" title="Profil C">C</div>
+      </div>
+      <input class="obs-field" type="text" placeholder="Observations...">
+    </div>
+  </div>
+
+  <!-- ÉQUIPE 02 -->
+  <div class="team-block" id="block-02">
+    <div class="team-head">
+      <span class="team-num">ÉQ 02</span>
+      <input class="team-name-input" type="text" placeholder="Nom de l'équipe...">
+      <span class="team-date">Séance : ___</span>
+    </div>
+    <div class="sec-label">OBS-01 · Qualité collective du relais</div>
+    <div class="collectif-row">
+      <span class="obs-label">RELAIS GLOBAL</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <div class="indice-box">
+        <span>Indice</span>
+        <input type="text" placeholder="0,0">
+      </div>
+    </div>
+    <div class="sec-label">OBS-02 · Performance individuelle 50m</div>
+    <table><thead><tr><th style="text-align:left;">Relayeur</th><th>Chrono</th><th>PI</th></tr></thead><tbody id="rows-02"></tbody></table>
+    <div class="sec-label">OBS-03 Transmission · OBS-05 Vitesses</div>
+    <div id="ch-02"></div>
+    <div class="profil-footer">
+      <span class="pf-label">Profil ÉQ</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <input class="obs-field" type="text" placeholder="Observations...">
+    </div>
+  </div>
+
+  <!-- ÉQUIPE 03 -->
+  <div class="team-block" id="block-03">
+    <div class="team-head">
+      <span class="team-num">ÉQ 03</span>
+      <input class="team-name-input" type="text" placeholder="Nom de l'équipe...">
+      <span class="team-date">Séance : ___</span>
+    </div>
+    <div class="sec-label">OBS-01 · Qualité collective du relais</div>
+    <div class="collectif-row">
+      <span class="obs-label">RELAIS GLOBAL</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <div class="indice-box">
+        <span>Indice</span>
+        <input type="text" placeholder="0,0">
+      </div>
+    </div>
+    <div class="sec-label">OBS-02 · Performance individuelle 50m</div>
+    <table><thead><tr><th style="text-align:left;">Relayeur</th><th>Chrono</th><th>PI</th></tr></thead><tbody id="rows-03"></tbody></table>
+    <div class="sec-label">OBS-03 Transmission · OBS-05 Vitesses</div>
+    <div id="ch-03"></div>
+    <div class="profil-footer">
+      <span class="pf-label">Profil ÉQ</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <input class="obs-field" type="text" placeholder="Observations...">
+    </div>
+  </div>
+
+  <!-- ÉQUIPE 04 -->
+  <div class="team-block" id="block-04">
+    <div class="team-head">
+      <span class="team-num">ÉQ 04</span>
+      <input class="team-name-input" type="text" placeholder="Nom de l'équipe...">
+      <span class="team-date">Séance : ___</span>
+    </div>
+    <div class="sec-label">OBS-01 · Qualité collective du relais</div>
+    <div class="collectif-row">
+      <span class="obs-label">RELAIS GLOBAL</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <div class="indice-box">
+        <span>Indice</span>
+        <input type="text" placeholder="0,0">
+      </div>
+    </div>
+    <div class="sec-label">OBS-02 · Performance individuelle 50m</div>
+    <table><thead><tr><th style="text-align:left;">Relayeur</th><th>Chrono</th><th>PI</th></tr></thead><tbody id="rows-04"></tbody></table>
+    <div class="sec-label">OBS-03 Transmission · OBS-05 Vitesses</div>
+    <div id="ch-04"></div>
+    <div class="profil-footer">
+      <span class="pf-label">Profil ÉQ</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <input class="obs-field" type="text" placeholder="Observations...">
+    </div>
+  </div>
+
+</div><!-- /page 1 -->
+
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 2 — ÉQUIPES 05 à 08
+════════════════════════════════════════════════════════ -->
+<div class="page page-break" id="page2">
+
+  <!-- ÉQUIPE 05 -->
+  <div class="team-block" id="block-05">
+    <div class="team-head">
+      <span class="team-num">ÉQ 05</span>
+      <input class="team-name-input" type="text" placeholder="Nom de l'équipe...">
+      <span class="team-date">Séance : ___</span>
+    </div>
+    <div class="sec-label">OBS-01 · Qualité collective du relais</div>
+    <div class="collectif-row">
+      <span class="obs-label">RELAIS GLOBAL</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <div class="indice-box">
+        <span>Indice</span>
+        <input type="text" placeholder="0,0">
+      </div>
+    </div>
+    <div class="sec-label">OBS-02 · Performance individuelle 50m</div>
+    <table><thead><tr><th style="text-align:left;">Relayeur</th><th>Chrono</th><th>PI</th></tr></thead><tbody id="rows-05"></tbody></table>
+    <div class="sec-label">OBS-03 Transmission · OBS-05 Vitesses</div>
+    <div id="ch-05"></div>
+    <div class="profil-footer">
+      <span class="pf-label">Profil ÉQ</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <input class="obs-field" type="text" placeholder="Observations...">
+    </div>
+  </div>
+
+  <!-- ÉQUIPE 06 -->
+  <div class="team-block" id="block-06">
+    <div class="team-head">
+      <span class="team-num">ÉQ 06</span>
+      <input class="team-name-input" type="text" placeholder="Nom de l'équipe...">
+      <span class="team-date">Séance : ___</span>
+    </div>
+    <div class="sec-label">OBS-01 · Qualité collective du relais</div>
+    <div class="collectif-row">
+      <span class="obs-label">RELAIS GLOBAL</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <div class="indice-box">
+        <span>Indice</span>
+        <input type="text" placeholder="0,0">
+      </div>
+    </div>
+    <div class="sec-label">OBS-02 · Performance individuelle 50m</div>
+    <table><thead><tr><th style="text-align:left;">Relayeur</th><th>Chrono</th><th>PI</th></tr></thead><tbody id="rows-06"></tbody></table>
+    <div class="sec-label">OBS-03 Transmission · OBS-05 Vitesses</div>
+    <div id="ch-06"></div>
+    <div class="profil-footer">
+      <span class="pf-label">Profil ÉQ</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <input class="obs-field" type="text" placeholder="Observations...">
+    </div>
+  </div>
+
+  <!-- ÉQUIPE 07 -->
+  <div class="team-block" id="block-07">
+    <div class="team-head">
+      <span class="team-num">ÉQ 07</span>
+      <input class="team-name-input" type="text" placeholder="Nom de l'équipe...">
+      <span class="team-date">Séance : ___</span>
+    </div>
+    <div class="sec-label">OBS-01 · Qualité collective du relais</div>
+    <div class="collectif-row">
+      <span class="obs-label">RELAIS GLOBAL</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <div class="indice-box">
+        <span>Indice</span>
+        <input type="text" placeholder="0,0">
+      </div>
+    </div>
+    <div class="sec-label">OBS-02 · Performance individuelle 50m</div>
+    <table><thead><tr><th style="text-align:left;">Relayeur</th><th>Chrono</th><th>PI</th></tr></thead><tbody id="rows-07"></tbody></table>
+    <div class="sec-label">OBS-03 Transmission · OBS-05 Vitesses</div>
+    <div id="ch-07"></div>
+    <div class="profil-footer">
+      <span class="pf-label">Profil ÉQ</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <input class="obs-field" type="text" placeholder="Observations...">
+    </div>
+  </div>
+
+  <!-- ÉQUIPE 08 -->
+  <div class="team-block" id="block-08">
+    <div class="team-head">
+      <span class="team-num">ÉQ 08</span>
+      <input class="team-name-input" type="text" placeholder="Nom de l'équipe...">
+      <span class="team-date">Séance : ___</span>
+    </div>
+    <div class="sec-label">OBS-01 · Qualité collective du relais</div>
+    <div class="collectif-row">
+      <span class="obs-label">RELAIS GLOBAL</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <div class="indice-box">
+        <span>Indice</span>
+        <input type="text" placeholder="0,0">
+      </div>
+    </div>
+    <div class="sec-label">OBS-02 · Performance individuelle 50m</div>
+    <table><thead><tr><th style="text-align:left;">Relayeur</th><th>Chrono</th><th>PI</th></tr></thead><tbody id="rows-08"></tbody></table>
+    <div class="sec-label">OBS-03 Transmission · OBS-05 Vitesses</div>
+    <div id="ch-08"></div>
+    <div class="profil-footer">
+      <span class="pf-label">Profil ÉQ</span>
+      <div class="deg-group">
+        <div class="deg-btn" onclick="toggle(this,'a')">A</div>
+        <div class="deg-btn" onclick="toggle(this,'b')">B</div>
+        <div class="deg-btn" onclick="toggle(this,'c')">C</div>
+      </div>
+      <input class="obs-field" type="text" placeholder="Observations...">
+    </div>
+  </div>
+
+</div><!-- /page 2 -->
+
+
+<script>
+/* ─── TOGGLE DEGREE ──────────────────────────────────── */
+function toggle(btn, deg) {
+  const group = btn.closest('.deg-group');
+  const already = btn.classList.contains('sel-' + deg);
+  group.querySelectorAll('.deg-btn').forEach(b => b.className = 'deg-btn');
+  if (!already) btn.classList.add('sel-' + deg);
+}
+
+/* ─── BUILD RELAYEUR ROWS ────────────────────────────── */
+function degGroup(obs) {
+  return `<div class="deg-group">
+    <div class="deg-btn" onclick="toggle(this,'a')" title="${obs}−">A</div>
+    <div class="deg-btn" onclick="toggle(this,'b')" title="${obs}~">B</div>
+    <div class="deg-btn" onclick="toggle(this,'c')" title="${obs}+">C</div>
+  </div>`;
+}
+
+function buildRows(eqNum) {
+  const tbody = document.getElementById('rows-' + eqNum);
+  const chDiv = document.getElementById('ch-' + eqNum);
+  if (!tbody || !chDiv) return;
+
+  // 4 relayeur rows
+  let rowsHtml = '';
+  for (let r = 1; r <= 4; r++) {
+    const rowClass = r % 2 === 0 ? ' style="background:var(--stripe)"' : '';
+    rowsHtml += `<tr${rowClass}>
+      <td class="rname"><input class="name-field" type="text" placeholder="R${r} · Nom..."></td>
+      <td style="text-align:center;"><input class="chrono-field" type="text" placeholder='__"__'></td>
+      <td style="text-align:center;">${degGroup('PI')}</td>
+    </tr>`;
+  }
+  tbody.innerHTML = rowsHtml;
+
+  // 3 charnière rows
+  const chLabels = ['Ch1 : R1→R2','Ch2 : R2→R3','Ch3 : R3→R4'];
+  let chHtml = '';
+  chLabels.forEach(label => {
+    chHtml += `<div class="charniere-row">
+      <span class="ch-label">${label}</span>
+      <span class="obs-tag">QT</span>
+      ${degGroup('QT')}
+      <span style="margin:0 3px;color:#ccc;">│</span>
+      <span class="obs-tag">AV</span>
+      ${degGroup('AV')}
+    </div>`;
+  });
+  chDiv.innerHTML = chHtml;
+}
+
+// Build all 8 blocks
+['01','02','03','04','05','06','07','08'].forEach(n => buildRows(n));
+
+/* ─── RESET ALL ──────────────────────────────────────── */
+function resetAll() {
+  if (!confirm('Réinitialiser toutes les saisies ?')) return;
+  document.querySelectorAll('.deg-btn').forEach(b => b.className = 'deg-btn');
+  document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
+}
+</script>
+</body>
+</html>
