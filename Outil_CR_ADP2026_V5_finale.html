@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Outil v4 — Course de Relais — CR — ADP2026 — Indice de Relais</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230b2038'/%3E%3Ccircle cx='32' cy='32' r='29' fill='none' stroke='%23ff6b35' stroke-width='2'/%3E%3Ccircle cx='17' cy='17' r='3.4' fill='%23fef9f3'/%3E%3Cpath d='M17 21 L15 31 M17 21 L21 30' stroke='%23fef9f3' stroke-width='2.2' stroke-linecap='round' fill='none'/%3E%3Crect x='24' y='24' width='13' height='3.8' rx='1.9' fill='%23d4a534' transform='rotate(-16 30.5 26)'/%3E%3Ccircle cx='45' cy='15' r='3.4' fill='%23fef9f3'/%3E%3Cpath d='M45 19 L41 27 M45 19 L48 29' stroke='%23fef9f3' stroke-width='2.2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+<style>
+:root{
+  --A:#FDEEEE;--A2:#d9534f;--At:#7a1a1a;
+  --B:#FFF4E5;--B2:#e67e22;--Bt:#7a3d00;
+  --C:#E8F4E9;--C2:#2e8b3d;--Ct:#175a1f;
+  --bg:#eef1f5;--ink:#101820;--muted:#5f6b78;
+  --panel:#fff;--border:#dde3ea;--border-soft:#e9edf2;--header:#0b2038;--header2:#0d2847;--htext:#fef9f3;
+  --accent:#ff6b35;--accent-light:#ff8c5a;--accent-dark:#d9501f;--gold:#d4a534;--gold-light:#f0c869;
+  --step-active:#0b2038;--step-done:#2e8b3d;--step-lock:#c2cad3;
+  --font:'Courier Prime','Courier New',monospace;
+  --ui:-apple-system,'Segoe UI',Roboto,system-ui,sans-serif;
+  --indice-pos:#1c7a32;--indice-neg:#d9534f;--indice-neu:#e67e22;
+  --shadow-sm:0 1px 2px rgba(11,32,56,.06),0 1px 1px rgba(11,32,56,.04);
+  --shadow-md:0 4px 10px rgba(11,32,56,.08),0 1px 3px rgba(11,32,56,.06);
+  --shadow-lg:0 10px 28px rgba(11,32,56,.14),0 3px 8px rgba(11,32,56,.08);
+  --radius-sm:4px;--radius-md:8px;--radius-lg:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--ui);background:var(--bg);color:var(--ink);font-size:13px;min-width:360px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeInUp .28s ease}
+
+/* HEADER */
+.app-header{background:linear-gradient(135deg,var(--header) 0%,var(--header2) 60%,#123a5e 100%);background-image:linear-gradient(135deg,var(--header) 0%,var(--header2) 60%,#123a5e 100%),repeating-linear-gradient(180deg,rgba(255,255,255,0.04) 0px,rgba(255,255,255,0.04) 2px,transparent 2px,transparent 26px);color:var(--htext);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:3px solid var(--accent);box-shadow:var(--shadow-md);position:relative}
+.app-header .title{font-family:var(--ui);font-size:16px;font-weight:700;letter-spacing:.02em;line-height:1.25}
+.app-header .sub{font-size:10px;opacity:.72;margin-top:3px;letter-spacing:.02em;font-weight:500}
+.cr-logo{flex-shrink:0;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}
+.badge{background:linear-gradient(135deg,var(--accent-light),var(--accent));color:#3a1505;padding:3px 10px;font-size:9px;font-weight:700;border-radius:20px;letter-spacing:.04em;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+
+/* PRIVACY BANNER */
+.privacy-banner{background:linear-gradient(135deg,#eef7ec,#e6f3e3);border-left:3px solid var(--C2);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:9px 14px;font-size:11px;color:var(--Ct);margin-bottom:10px;box-shadow:var(--shadow-sm)}
+.privacy-banner strong{font-weight:700}
+
+/* STEP BAR */
+.step-bar{display:flex;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;box-shadow:var(--shadow-sm)}
+.step-tab{flex:1;min-width:70px;padding:10px 4px 9px;text-align:center;font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--step-lock);border-right:1px solid var(--border-soft);cursor:not-allowed;transition:all .2s ease;user-select:none;border-bottom:3px solid transparent}
+.step-tab.done{color:var(--step-done);cursor:pointer}
+.step-tab.done:hover{background:#f3faf0}
+.step-tab.active{color:var(--step-active);border-bottom-color:var(--accent);cursor:default;background:linear-gradient(180deg,#fafbfc,#f3f5f8)}
+.step-tab .snum{font-size:17px;display:block;line-height:1.3;font-weight:700}
+
+/* CONTAINER */
+.container{max-width:1100px;margin:0 auto;padding:14px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow .2s}
+.panel-head{background:linear-gradient(135deg,var(--header) 0%,var(--header2) 100%);color:var(--htext);padding:10px 14px;font-size:12px;font-weight:700;letter-spacing:.03em;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.panel-body{padding:16px}
+
+/* SAISIE — GRILLE 7 colonnes avec perfos individuelles */
+.saisie-grid{display:grid;grid-template-columns:1fr repeat(3,auto) 1fr auto;gap:6px;align-items:center;margin-bottom:10px;font-size:11px;padding:8px;background:#fff;border-radius:var(--radius-sm);border:1px solid var(--border-soft);transition:box-shadow .15s}
+.saisie-grid:hover{box-shadow:var(--shadow-sm)}
+.chrono-cell{display:flex;align-items:center;gap:3px;justify-content:center}
+.perf-indiv-cell{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.genre-btn-saisie{transition:all .15s}
+.genre-btn-saisie.sel-g{background:linear-gradient(135deg,#cfe5ff,#bcd9ff);border-color:#2f5fa8!important;color:#0a3a78!important;font-weight:700}
+.genre-btn-saisie.sel-f{background:linear-gradient(135deg,#fbdcf0,#f6c7e6);border-color:#a8377f!important;color:#7a1f5c!important;font-weight:700}
+.saisie-grid .col-h{font-size:9px;font-weight:700;color:var(--muted);text-align:center;letter-spacing:.04em;text-transform:uppercase;padding:5px 4px;background:linear-gradient(180deg,#fbfcfd,#eef1f5);border:1px solid var(--border);border-radius:var(--radius-sm)}
+.saisie-grid .col-h.left{text-align:left}
+.name-input{width:100%;border:1px solid var(--border);border-radius:2px;padding:4px 6px;font-family:var(--font);font-size:11px;outline:none}
+.name-input:focus{border-color:var(--step-active)}
+.deg-sel{display:flex;gap:3px;justify-content:center}
+.d-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);font-size:9.5px;font-weight:700;cursor:pointer;background:#fff;color:#a8b0b8;font-family:var(--ui);transition:all .12s ease;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.d-btn:hover{border-color:var(--step-lock);color:var(--muted);transform:scale(1.06)}
+.d-btn:active{transform:scale(.92)}
+.d-btn.sA{background:var(--A);border-color:var(--A2);color:var(--At);border-width:2px;box-shadow:0 2px 5px rgba(217,83,79,.3);transform:scale(1.04)}
+.d-btn.sB{background:var(--B);border-color:var(--B2);color:var(--Bt);border-width:2px;box-shadow:0 2px 5px rgba(230,126,34,.3);transform:scale(1.04)}
+.d-btn.sC{background:var(--C);border-color:var(--C2);color:var(--Ct);border-width:2px;box-shadow:0 2px 5px rgba(46,139,61,.3);transform:scale(1.04)}
+.del-btn{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);color:#c2c9cf;cursor:pointer;padding:4px 8px;font-size:10px;touch-action:manipulation;transition:all .15s}
+.del-btn:hover{border-color:var(--A2);color:var(--A2);background:var(--A)}
+
+/* RELAYEURS INDIVIDUELS */
+.relayeur-zone{border:1px solid var(--border);border-radius:var(--radius-md);padding:8px 10px;background:linear-gradient(160deg,#fff,#f7f8fb);min-width:200px;box-shadow:var(--shadow-sm)}
+.relayeur-zone .rz-title{font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.relayeur-row{display:flex;align-items:center;gap:4px;margin-bottom:3px;flex-wrap:nowrap}
+.relayeur-row .rl-num{font-size:8.5px;font-weight:700;color:#fff;background:var(--header2);border-radius:50%;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.relayeur-row .rl-name{font-size:9.5px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px 5px;width:70px;font-family:var(--ui);transition:border-color .15s}
+.relayeur-row .rl-chrono{font-size:9.5px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px 5px;width:42px;text-align:center;font-family:var(--ui);font-weight:600;transition:border-color .15s}
+.relayeur-row .rl-name:focus,.relayeur-row .rl-chrono:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px rgba(255,107,53,.15)}
+.relayeur-row .rl-indice{font-size:8.5px;font-weight:700;min-width:38px;text-align:right}
+.indice-pos{color:var(--indice-pos)}
+.indice-neg{color:var(--indice-neg)}
+.indice-neu{color:var(--indice-neu)}
+.btn-calc-indice{font-size:8.5px;padding:5px 10px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--header2),var(--header));color:#fff;cursor:pointer;font-weight:700;letter-spacing:.03em;transition:all .15s;white-space:nowrap;box-shadow:var(--shadow-sm)}
+.btn-calc-indice:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.btn-calc-indice:active{transform:translateY(0) scale(.96)}
+.indice-result{font-size:9.5px;padding:6px 9px;border-radius:var(--radius-sm);border:1px solid;margin-top:5px;line-height:1.45;font-weight:500}
+.indice-result.ir-pos{background:linear-gradient(135deg,#eef9ef,var(--C));border-color:#a9d8ae;color:var(--Ct)}
+.indice-result.ir-neg{background:linear-gradient(135deg,#fef2f2,var(--A));border-color:#f0bcbc;color:var(--At)}
+.indice-result.ir-neu{background:linear-gradient(135deg,#fff8ef,var(--B));border-color:#f3cb8e;color:var(--Bt)}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-family:var(--ui);font-size:11.5px;font-weight:600;cursor:pointer;letter-spacing:.01em;transition:all .15s ease;background:#fff;color:var(--ink);touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:var(--shadow-sm)}
+.btn:hover{background:var(--bg);border-color:var(--step-lock);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn.primary{background:linear-gradient(135deg,var(--header2),var(--header));color:#fff;border-color:var(--header)}
+.btn.primary:hover{background:linear-gradient(135deg,#123a5e,var(--header2));border-color:var(--header)}
+.btn.success{background:linear-gradient(135deg,#34995f,var(--C2));color:#fff;border-color:var(--C2)}
+.btn.success:hover{background:linear-gradient(135deg,#3da86a,#287a35)}
+.btn.danger{background:linear-gradient(135deg,#e2645f,var(--A2));color:#fff;border-color:var(--A2)}
+.btn.danger:hover{background:linear-gradient(135deg,#e87772,#c44742)}
+.btn.sm{padding:5px 11px;font-size:10.5px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:10.5px;font-family:var(--ui);border-radius:var(--radius-sm);overflow:hidden;box-shadow:var(--shadow-sm)}
+.data-table th{background:linear-gradient(180deg,#fbfcfd,#eef1f5);border:1px solid var(--border);padding:7px 6px;text-align:center;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap}
+.data-table td{border:1px solid var(--border-soft);padding:6px 6px;text-align:center;vertical-align:middle;transition:background .12s}
+.data-table tbody tr:hover td{filter:brightness(0.97)}
+.data-table tr.pA td{background:var(--A)}
+.data-table tr.pB td{background:var(--B)}
+.data-table tr.pC td{background:var(--C)}
+.data-table td.left{text-align:left}
+.data-table .rank{font-weight:700;color:var(--muted);font-size:9.5px}
+
+/* INDICE TABLE */
+.indice-badge{display:inline-block;padding:2px 7px;border-radius:2px;font-weight:bold;font-size:9px;font-family:var(--font)}
+.indice-badge.ib-pos{background:#e8f5e9;color:var(--Ct);border:1px solid var(--C2)}
+.indice-badge.ib-neg{background:var(--A);color:var(--At);border:1px solid var(--A2)}
+.indice-badge.ib-neu{background:var(--B);color:var(--Bt);border:1px solid var(--B2)}
+.mini-bar{height:8px;border-radius:2px;display:inline-block;vertical-align:middle;min-width:3px}
+
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0}
+.card{border-radius:var(--radius-md);padding:14px 12px;text-align:center;border:1px solid transparent;box-shadow:var(--shadow-sm);transition:transform .15s ease,box-shadow .15s ease;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.card.cA{background:linear-gradient(160deg,#fff,var(--A));border-color:#f3c9c9}
+.card.cA::before{background:var(--A2)}
+.card.cB{background:linear-gradient(160deg,#fff,var(--B));border-color:#f5d9b0}
+.card.cB::before{background:var(--B2)}
+.card.cC{background:linear-gradient(160deg,#fff,var(--C));border-color:#bfe0c4}
+.card.cC::before{background:var(--C2)}
+.card.cN{background:linear-gradient(160deg,#fff,#f2f4f7);border-color:var(--border)}
+.card.cN::before{background:var(--muted)}
+.card .cval{font-size:28px;font-weight:700;font-family:var(--ui);line-height:1.1;letter-spacing:-.01em}
+.card .clab{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;opacity:.68;margin-top:3px;line-height:1.4}
+.chart-box{background:linear-gradient(160deg,#fff,#fafbfd);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;margin:12px 0;box-shadow:var(--shadow-sm)}
+.chart-title{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;text-align:center}
+.table-filter-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0}
+.filter-search{flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--border);border-radius:20px;font-family:var(--ui);font-size:11.5px;outline:none;background:#fff;transition:border-color .15s,box-shadow .15s}
+.filter-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,107,53,.12)}
+.filter-profil-group{display:flex;gap:5px}
+.filter-chip{padding:5px 13px;border-radius:14px;border:1.5px solid var(--border);background:#fff;font-size:10.5px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .15s;box-shadow:var(--shadow-sm)}
+.filter-chip:hover{transform:translateY(-1px)}
+.filter-chip.active{background:linear-gradient(135deg,var(--header2),var(--header));color:#fff;border-color:var(--header)}
+.filter-chip.fA.active{background:linear-gradient(135deg,#e2645f,var(--A2));border-color:var(--A2)}
+.filter-chip.fB.active{background:linear-gradient(135deg,#f0934a,var(--B2));border-color:var(--B2)}
+.filter-chip.fC.active{background:linear-gradient(135deg,#3da249,var(--C2));border-color:var(--C2)}
+.filter-count{font-size:10.5px;color:var(--muted);font-weight:600;white-space:nowrap}
+.row-hidden{display:none!important}
+.compare-box{background:linear-gradient(160deg,#fff,#fff8f4);border:1.5px dashed var(--accent-light);border-radius:var(--radius-md);padding:14px 16px;margin:12px 0;box-shadow:var(--shadow-sm)}
+.compare-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.compare-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px;border-radius:var(--radius-sm);overflow:hidden;box-shadow:var(--shadow-sm)}
+.compare-table th,.compare-table td{padding:7px 10px;border:1px solid var(--border-soft);text-align:center}
+.compare-table th{background:linear-gradient(180deg,#fbfcfd,#eef1f5);color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.compare-delta-up{color:var(--C2);font-weight:700}
+.compare-delta-down{color:var(--A2);font-weight:700}
+.compare-delta-flat{color:var(--muted)}
+
+/* AXIS */
+.axis-item{border:1.5px solid var(--border);border-radius:3px;padding:10px;margin-bottom:8px;cursor:pointer;transition:all .15s;display:flex;gap:10px;align-items:flex-start}
+.axis-item:hover{border-color:var(--step-active)}
+.axis-item.selected{border-color:var(--step-active);background:#f0f4ff}
+.axis-item input[type=checkbox]{width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer}
+.axis-title{font-weight:bold;font-size:12px;margin-bottom:4px}
+.axis-meta{font-size:10px;color:var(--muted);font-family:var(--font)}
+.axis-bar{height:6px;border-radius:3px;background:#eee;margin-top:6px;overflow:hidden}
+.axis-bar-fill{height:100%;border-radius:3px;background:var(--A2);transition:width .4s}
+
+/* SLIDER */
+.slider-wrap{margin:16px 0}
+.slider-wrap label{font-weight:bold;font-size:12px;display:block;margin-bottom:8px}
+input[type=range]{width:100%;accent-color:var(--header);height:8px}
+.slider-val{font-family:var(--font);font-size:18px;font-weight:bold;color:var(--step-active);margin:4px 0 10px}
+.distrib-preview{background:#f8f8f8;border:1px solid var(--border);border-radius:3px;padding:10px;font-family:var(--font);font-size:11px}
+.distrib-seq{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.distrib-seq .seq-label{min-width:80px;font-weight:bold;font-size:10px;color:var(--muted)}
+.seq-block{background:var(--header);color:#fff;padding:2px 8px;border-radius:2px;font-size:10px}
+
+/* PLANNING */
+.seq-section{margin-bottom:20px}
+.seq-head{background:var(--header);color:var(--htext);padding:8px 12px;border-radius:3px 3px 0 0;font-family:var(--font);font-size:11px;font-weight:bold}
+.seq-sub{background:#2a2a4e;color:#ccc;padding:4px 12px;font-size:10px;font-family:var(--font)}
+.plan-table{width:100%;border-collapse:collapse;font-size:10px}
+.plan-table th{background:#f0f0f0;border:1px solid var(--border);padding:5px;text-align:center;font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.plan-table td{border:1px solid #e8e8e8;padding:6px;vertical-align:top}
+.plan-table .td-A{background:var(--A)}
+.plan-table .td-B{background:var(--B)}
+.plan-table .td-C{background:var(--C)}
+.plan-table .td-seq{font-weight:bold;text-align:center;white-space:nowrap;font-family:var(--font)}
+.sa-chip{display:inline-block;background:rgba(0,0,0,.07);padding:1px 5px;border-radius:2px;font-size:9px;font-family:var(--font);margin-bottom:3px}
+.plan-consigne{font-size:10px;margin:2px 0}
+.plan-critere{font-size:9px;color:var(--muted);font-style:italic}
+.passage-indicator{background:#fff3ea;border:1px dashed #ff6b35;border-radius:2px;padding:5px 8px;margin-top:4px;font-size:9px;font-family:var(--font)}
+.passage-indicator .pi-label{font-weight:bold;color:#b8470f}
+
+/* DECISION */
+.decision-box{padding:10px;border-radius:3px;border:1.5px solid;margin:10px 0;font-family:var(--font);font-size:11px}
+.decision-box.dA{background:var(--A);border-color:var(--A2);color:var(--At)}
+.decision-box.dB{background:var(--B);border-color:var(--B2);color:var(--Bt)}
+.decision-box.dC{background:var(--C);border-color:var(--C2);color:var(--Ct)}
+
+/* ALERT */
+.alert{padding:8px 10px;border-radius:2px;font-size:11px;margin:6px 0}
+.alert.info{background:#e8f0fe;border-left:3px solid #3b82f6}
+.alert.warn{background:#fff3e0;border-left:3px solid #ff6b35}
+.alert.err{background:var(--A);border-left:3px solid var(--A2)}
+.alert.success{background:#e8f5e9;border-left:3px solid var(--C2);color:var(--Ct)}
+
+/* OBS-ANALYSIS */
+.obs-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:11px}
+.obs-row:last-child{border-bottom:none}
+.obs-name{min-width:160px;font-family:var(--font);font-size:10px;font-weight:bold}
+.obs-moy{min-width:50px;text-align:center;font-family:var(--font);font-weight:bold}
+.obs-status{padding:2px 8px;border-radius:2px;font-size:9px;font-weight:bold}
+.obs-status.sA{background:var(--A);color:var(--At)}
+.obs-status.sB{background:var(--B);color:var(--Bt)}
+.obs-status.sC{background:var(--C);color:var(--Ct)}
+
+/* RÉSUMÉ CYCLE */
+.cycle-summary{background:#f5f5f5;border:1px solid var(--border);border-radius:3px;padding:12px;margin-top:16px;font-family:var(--font);font-size:11px}
+.cycle-summary h3{font-size:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em}
+
+/* SESSION PANEL */
+.session-panel{background:#f8f9fa;border:1px solid var(--border);border-radius:3px;padding:12px;margin-bottom:12px}
+.session-panel h4{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;font-family:var(--font)}
+
+/* FOURCHETTE BAR */
+.fourchette-bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--border);padding:8px 12px;margin-top:8px;margin-bottom:6px;border-radius:var(--radius-sm);font-family:var(--ui);font-size:8.5px;box-shadow:var(--shadow-sm)}
+.fourchette-bar .fb-title{font-weight:700;color:var(--ink);font-size:9.5px;letter-spacing:.03em;margin-right:3px}
+.fb-chip{display:inline-flex;align-items:center;padding:3px 9px;border-radius:12px;font-weight:700;font-size:8.5px}
+.fb-chip.a{background:var(--A);color:var(--At);border:1px solid #f0bcbc}
+.fb-chip.b{background:var(--B);color:var(--Bt);border:1px solid #f3cb8e}
+.fb-chip.c{background:var(--C);color:var(--Ct);border:1px solid #a9d8ae}
+.fb-sep{color:#ccc;margin:0 3px}
+.fb-note{font-size:7.5px;color:#888;margin-left:auto;font-style:italic}
+
+/* BOUTON GRILLE DI */
+.btn-grille-di{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;background:linear-gradient(135deg,var(--accent-light),var(--accent));color:#3a1505;border:none;border-radius:20px;font-family:var(--ui);font-size:10.5px;font-weight:700;letter-spacing:.02em;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 6px rgba(217,80,31,.35)}
+.btn-grille-di:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(217,80,31,.45)}
+.btn-grille-di:active{transform:translateY(0) scale(.97)}
+.btn-tuto{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;background:rgba(255,255,255,.08);color:#fef9f3;border:1.5px solid rgba(255,255,255,.35);border-radius:20px;font-family:var(--ui);font-size:10.5px;font-weight:700;letter-spacing:.02em;cursor:pointer;transition:all .15s ease;white-space:nowrap;flex-shrink:0;backdrop-filter:blur(2px)}
+.btn-tuto:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.7);transform:translateY(-1px)}
+
+/* DARK MODE */
+.dark-mode{filter:invert(1) hue-rotate(180deg)}
+.dashboard-box{border:2px solid #0d2847;border-radius:4px;padding:12px;margin:12px 0;background:#f8fafc}
+.dashboard-title{font-weight:bold;font-size:14px;margin-bottom:8px}
+
+/* MODAL TUTORIEL */
+.tuto-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;align-items:center;justify-content:center;padding:12px}
+.tuto-overlay.open{display:flex}
+.tuto-modal{background:#fff;border-radius:4px;max-width:560px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.4);display:flex;flex-direction:column}
+.tuto-header{background:#0d2847;color:#f0f0f0;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.tuto-header-title{font-family:'Courier Prime','Courier New',monospace;font-size:12px;font-weight:bold;letter-spacing:.08em;text-transform:uppercase}
+.tuto-close{background:none;border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:2px;width:26px;height:26px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.tuto-close:hover{background:rgba(255,255,255,.15)}
+.tuto-progress{display:flex;gap:4px;padding:10px 16px 0;flex-shrink:0}
+.tuto-dot{height:4px;flex:1;border-radius:2px;background:#e0e0e0;transition:background .3s}
+.tuto-dot.active{background:#ff6b35}
+.tuto-dot.done{background:#5a9e3a}
+.tuto-body{padding:16px;flex:1}
+.tuto-step-num{font-size:9px;font-weight:bold;letter-spacing:.1em;text-transform:uppercase;color:#ff6b35;font-family:'Courier Prime','Courier New',monospace;margin-bottom:4px}
+.tuto-step-title{font-size:14px;font-weight:bold;color:#0d2847;margin-bottom:10px;line-height:1.3}
+.tuto-illus{background:#f5f5f5;border:1.5px solid #ddd;border-radius:3px;padding:10px 14px;margin-bottom:12px;font-family:'Courier Prime','Courier New',monospace;font-size:10px;line-height:1.7;color:#333;white-space:pre-wrap;overflow-x:auto}
+.tuto-illus .hl{color:#0d2847;font-weight:bold}
+.tuto-illus .ok{color:#5a9e3a;font-weight:bold}
+.tuto-illus .warn{color:#d9534f;font-weight:bold}
+.tuto-illus .gold{color:#b87800;font-weight:bold}
+.tuto-desc{font-size:11px;color:#444;line-height:1.6;margin-bottom:8px}
+.tuto-tip{background:#fff3ea;border-left:3px solid #ff6b35;padding:6px 10px;font-size:10px;color:#b8470f;border-radius:0 2px 2px 0;margin-top:8px}
+.tuto-footer{padding:10px 16px;border-top:1px solid #eee;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.tuto-counter{font-size:10px;color:#999;font-family:'Courier Prime','Courier New',monospace;white-space:nowrap}
+.tuto-nav{display:flex;gap:6px}
+.tuto-btn{padding:6px 14px;border-radius:2px;border:1.5px solid #0d2847;background:#fff;color:#0d2847;font-size:10px;font-weight:bold;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:background .15s}
+.tuto-btn:hover{background:#0d2847;color:#fff}
+.tuto-btn.primary{background:#0d2847;color:#fff}
+.tuto-btn.primary:hover{background:#2e2e5e}
+.tuto-btn.success{background:#5a9e3a;color:#fff;border-color:#5a9e3a}
+.tuto-btn.success:hover{background:#3d7a1a}
+
+/* INDICE PANEL dans étape 1 */
+.indice-panel{background:#fff;border:2px solid var(--header);border-radius:4px;margin:16px 0;overflow:hidden}
+.indice-panel-head{background:var(--header);color:#fff;padding:8px 14px;font-family:var(--font);font-size:11px;font-weight:bold;letter-spacing:.08em;display:flex;justify-content:space-between;align-items:center}
+.indice-panel-body{padding:12px}
+.indice-explainer{font-size:10px;color:var(--muted);font-family:var(--font);margin-bottom:10px;padding:6px 8px;background:#f5f5f5;border-radius:2px;border-left:3px solid var(--header)}
+.indice-table{width:100%;border-collapse:collapse;font-size:10px;font-family:var(--font)}
+.indice-table th{background:#0d2847;color:#fff;border:1px solid #333;padding:5px 6px;text-align:center;font-size:9px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.indice-table td{border:1px solid #e0e0e0;padding:4px 6px;text-align:center;vertical-align:middle}
+.indice-table tr:nth-child(even) td{background:#fafafa}
+.indice-table tr:hover td{background:#f0f4ff}
+.indice-table td.left{text-align:left}
+.indice-sparkbar{height:10px;border-radius:2px;display:inline-block;min-width:3px;vertical-align:middle;transition:width .4s}
+
+/* FLOATING */
+.floating-tools{position:fixed;bottom:15px;right:15px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+.floating-tools button{padding:8px 12px;font-weight:bold}
+
+@media print{
+  .step-bar,.btn-row,.saisie-section,.app-header .badge,input[type=file],button{display:none!important}
+  .table-filter-bar,.filter-count{display:none!important}
+  .row-hidden{display:table-row!important}
+  .btn-calc-indice,.relayeur-row .rl-name,.relayeur-row .rl-chrono{border:none!important;background:transparent!important}
+  .app-header{background:#fff!important;color:#000!important;border-bottom:2px solid #000!important;background-image:none!important}
+  .app-header .sub{color:#444!important}
+  .cr-logo circle[fill="#ffffff"],.cr-logo path[stroke="#ffffff"]{stroke:#000!important;fill:#000!important}
+  .panel{box-shadow:none;border:1px solid #999}
+  .panel-head{background:#fff!important;color:#000!important;border-bottom:2px solid #000}
+  .chart-box{break-inside:avoid}
+  .data-table{break-inside:auto}
+  .data-table tr{break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media(max-width:600px){
+  .saisie-grid{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr 1fr}
+  .step-tab{font-size:9px;min-width:55px}
+  .step-tab .snum{font-size:13px}
+  .app-header .title{font-size:12px}
+  .data-table{font-size:9px}
+  .data-table th,.data-table td{padding:2px 3px}
+  .plan-table th,.plan-table td{padding:3px}
+  .axis-item{flex-direction:column;gap:6px}
+  .relayeur-zone{min-width:unset;width:100%}
+  .table-filter-bar{flex-direction:column;align-items:stretch}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <svg class="cr-logo" viewBox="0 0 64 64" width="46" height="46" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="logoRing" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ff8c5a"/>
+          <stop offset="100%" stop-color="#d9501f"/>
+        </linearGradient>
+        <linearGradient id="logoBaton" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#f0c869"/>
+          <stop offset="100%" stop-color="#d4a534"/>
+        </linearGradient>
+      </defs>
+      <circle cx="32" cy="32" r="30" fill="#0b2038"/>
+      <circle cx="32" cy="32" r="29" fill="none" stroke="url(#logoRing)" stroke-width="2"/>
+      <path d="M5 41 L59 41" stroke="#ffffff" stroke-width="1.4" opacity=".3"/>
+      <path d="M5 48 L59 48" stroke="#ffffff" stroke-width="1.4" opacity=".2"/>
+      <path d="M5 34 L59 34" stroke="#ffffff" stroke-width="1.4" opacity=".2"/>
+      <circle cx="17" cy="17" r="3.4" fill="#fef9f3"/>
+      <path d="M17 21 L15 31 M17 21 L21 30" stroke="#fef9f3" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <path d="M17 24 L26 27" stroke="#fef9f3" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M15 31 L11 40 M21 30 L23 41" stroke="#fef9f3" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <rect x="24" y="24" width="13" height="3.8" rx="1.9" fill="url(#logoBaton)" transform="rotate(-16 30.5 26)"/>
+      <circle cx="45" cy="15" r="3.4" fill="#fef9f3"/>
+      <path d="M45 19 L41 27 M45 19 L48 29" stroke="#fef9f3" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <path d="M45 22 L36 25" stroke="#fef9f3" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M41 27 L37 37 M48 29 L51 39" stroke="#fef9f3" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <path d="M14 52 L20 58 L32 50 L44 58 L50 52" fill="none" stroke="url(#logoRing)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <div class="title">Outil d'aide à la décision — Course de Relais — CR</div>
+      <div class="sub">ADP 2026 · CRMEF Inezgane · BOUARGANE · DI — Diagnostique Initial · Pas de note /20 · v4 — Indice de Relais</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="badge">v4 · INDICE RELAIS</div>
+    <button class="btn-grille-di" onclick="ouvrirGrilleDI()" title="Ouvrir la grille diagnostique terrain — 8 équipes (nouvel onglet)">
+      &#128203; Grille DI Terrain
+    </button>
+    <button class="btn-grille-di" onclick="telechargerGrilleDI()" title="Télécharger directement le fichier de la grille (si l'ouverture ne fonctionne pas)" style="padding:5px 9px;">
+      &#11015;
+    </button>
+    <button class="btn-tuto" onclick="openTuto()" title="Comment utiliser cet outil">&#10067; Tutoriel</button>
+    <button class="btn-tuto" onclick="toggleDarkMode()">🌙 Mode sombre</button>
+  </div>
+</div>
+
+<div class="privacy-banner">
+  <strong>🔒 Confidentialité totale :</strong> Aucune donnée n'est envoyée sur Internet. Tout reste stocké localement sur votre appareil. Fonctionne hors connexion.
+</div>
+
+<div class="step-bar" id="stepBar">
+  <div class="step-tab active" id="tab0" onclick="goStep(0)"><span class="snum">&#9654;</span>Saisie</div>
+  <div class="step-tab" id="tab1"><span class="snum">1</span>Diagnostic</div>
+  <div class="step-tab" id="tab2"><span class="snum">2</span>Axes</div>
+  <div class="step-tab" id="tab3"><span class="snum">3</span>Paramètres</div>
+  <div class="step-tab" id="tab4"><span class="snum">4</span>Planification</div>
+</div>
+
+<div class="container">
+
+<!-- ===== SAISIE ===== -->
+<div id="sec-saisie" class="saisie-section">
+
+  <div class="panel">
+    <div class="panel-head">
+      <span>Saisie manuelle — 1 ligne par équipe · Performances individuelles des relayeurs</span>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <label class="btn sm" style="cursor:pointer">
+          &#128196; Importer CSV <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="importCSV(this)">
+        </label>
+        <button class="btn sm primary" onclick="addRow()">+ Ajouter ligne</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="alert info" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span><strong>Distance de la piste :</strong></span>
+        <select id="distanceSelectOutil" onchange="onDistanceChangeOutil()" style="font-family:var(--ui);font-size:11.5px;font-weight:700;padding:6px 12px;border:1.5px solid var(--border);border-radius:20px;background:#fff;cursor:pointer;box-shadow:var(--shadow-sm);color:var(--header2)">
+          <option value="30">4×30 m</option>
+          <option value="40">4×40 m</option>
+          <option value="50" selected>4×50 m</option>
+          <option value="60">4×60 m</option>
+          <option value="80">4×80 m</option>
+        </select>
+        <div id="fourchette-bar" class="fourchette-bar" style="display:none;">
+          <span class="fb-title">&#9871; FOURCHETTE</span>
+          <span style="font-size:8px;font-weight:bold;color:#3366aa;">GARÇONS</span>
+          <span class="fb-chip c" id="fbG-c">C ≤28"5</span>
+          <span class="fb-chip b" id="fbG-b">B 28"6–36"0</span>
+          <span class="fb-chip a" id="fbG-a">A &gt;36"0</span>
+          <span class="fb-sep">│</span>
+          <span style="font-size:8px;font-weight:bold;color:#993399;">FILLES</span>
+          <span class="fb-chip c" id="fbF-c">C ≤33"0</span>
+          <span class="fb-chip b" id="fbF-b">B 33"1–42"0</span>
+          <span class="fb-chip a" id="fbF-a">A &gt;42"0</span>
+          <span class="fb-note">Chrono + genre → niveau s'affiche seul</span>
+        </div>
+      </div>
+
+      <div class="alert warn" style="font-size:10px;margin-top:6px">
+        <strong>🆕 NOUVEAU — Performance individuelle :</strong> Saisissez le chrono individuel de chaque relayeur (1→4) dans la zone "Relayeurs". Cliquez sur <strong>⚡ Calc. Indice</strong> pour comparer automatiquement les performances individuelles à la performance collective de l'équipe.
+      </div>
+
+      <div id="alert-zone"></div>
+
+      <div class="saisie-grid" id="saisieHeader">
+        <div class="col-h left">Prénom / Équipe</div>
+        <div class="col-h">OBS-01<br>QC</div>
+        <div class="col-h">OBS-02 Perf<br>Chrono · G/F</div>
+        <div class="col-h">OBS-03<br>QT</div>
+        <div class="col-h">Relayeurs (chrono indiv.)</div>
+        <div class="col-h"></div>
+      </div>
+      <div id="rowsContainer"></div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="analyser()">&#9654; Analyser la classe</button>
+        <button class="btn sm" onclick="resetAll()">&#8635; Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSION MANAGEMENT -->
+  <div class="session-panel">
+    <h4>&#128451; Gestion de session</h4>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">
+      Sauvegardez votre travail ou chargez une session précédente. Les données restent sur votre appareil.
+    </div>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn sm success" onclick="exportSession()">&#128190; Exporter session (.json)</button>
+      <label class="btn sm" style="cursor:pointer">
+        &#128193; Importer session <input type="file" id="sessionFile" accept=".json" style="display:none" onchange="importSession(this)">
+      </label>
+      <button class="btn sm danger" onclick="clearAllData()">&#128465; Nouvelle session</button>
+    </div>
+    <div id="session-status" style="font-size:10px;color:var(--muted);margin-top:6px;font-family:var(--font)"></div>
+  </div>
+</div>
+
+<!-- ===== ÉTAPE 1 ===== -->
+<div id="sec-step1" style="display:none">
+  <div class="panel">
+    <div class="panel-head">
+      <span>Étape 1 — Diagnostic de classe + Indice de Relais</span>
+      <button class="btn sm" onclick="imprimerBilan()">&#128424; Imprimer / PDF</button>
+    </div>
+    <div class="panel-body">
+      <div id="dashboard-auto" class="dashboard-box">
+        <strong class="dashboard-title">📊 Tableau de bord automatique</strong>
+        <div id="dashboard-content">Analyse visuelle automatique après diagnostic.</div>
+      </div>
+      <div class="compare-box" id="compareBox">
+        <div class="compare-head">
+          <span>📈 Comparer avec une séance précédente</span>
+          <label class="btn sm" style="margin:0">
+            &#128193; Charger une séance de référence
+            <input type="file" id="compareFile" accept=".json" style="display:none" onchange="chargerComparaison(this)">
+          </label>
+          <button class="btn sm" id="btnClearCompare" onclick="effacerComparaison()" style="display:none">&#10005; Retirer la comparaison</button>
+        </div>
+        <div id="compareResult"></div>
+      </div>
+      <div id="step1-content"></div>
+      <div class="btn-row">
+        <button class="btn sm" onclick="goStep(0)">&#8592; Retour saisie</button>
+        <button class="btn success" onclick="goStep(2)">Étape 2 — Axes prioritaires &#9654;</button>
+        <button class="btn sm" id="btnExport" onclick="exportCSV()">&#8595; Exporter CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ÉTAPE 2 ===== -->
+<div id="sec-step2" style="display:none">
+  <div class="panel">
+    <div class="panel-head">Étape 2 — Sélection des axes prioritaires (3 ou 4 maximum)</div>
+    <div class="panel-body">
+      <div class="alert info">Cochez <strong>3 ou 4 axes</strong>. La planification sera générée uniquement sur les axes validés.</div>
+      <div id="axes-list"></div>
+      <div id="axes-alert" class="alert warn" style="display:none">Sélectionnez entre 3 et 4 axes pour continuer.</div>
+      <div class="btn-row">
+        <button class="btn sm" onclick="goStep(1)">&#8592; Retour diagnostic</button>
+        <button class="btn success" id="btnStep3" onclick="goStep(3)" disabled>Étape 3 — Paramétrer le cycle &#9654;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ÉTAPE 3 ===== -->
+<div id="sec-step3" style="display:none">
+  <div class="panel">
+    <div class="panel-head">Étape 3 — Paramétrage du cycle</div>
+    <div class="panel-body">
+      <div class="slider-wrap">
+        <label>Nombre de séances du cycle</label>
+        <input type="range" id="sliderSeances" min="6" max="10" value="6" step="1" oninput="updateSlider()">
+        <div class="slider-val" id="sliderVal">6 séances</div>
+      </div>
+      <div class="distrib-preview" id="distribPreview"></div>
+      <div class="btn-row">
+        <button class="btn sm" onclick="goStep(2)">&#8592; Retour axes</button>
+        <button class="btn success" onclick="genererPlanification()">Étape 4 — Générer la planification &#9654;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ÉTAPE 4 ===== -->
+<div id="sec-step4" style="display:none">
+  <div class="panel">
+    <div class="panel-head">
+      <span>Étape 4 — Planification dynamique du cycle</span>
+      <button class="btn sm" onclick="window.print()">&#128424; Imprimer</button>
+    </div>
+    <div class="panel-body">
+      <div id="step4-content"></div>
+      <div class="btn-row">
+        <button class="btn sm" onclick="goStep(3)">&#8592; Retour paramètres</button>
+        <button class="btn sm" id="btnExport4" onclick="exportCSV()">&#8595; Exporter CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- MODAL TUTORIEL -->
+<div class="tuto-overlay" id="tutoOverlay" onclick="tutoClickOutside(event)">
+  <div class="tuto-modal" id="tutoModal">
+    <div class="tuto-header">
+      <div class="tuto-header-title">🎓 Tutoriel — Comment utiliser l'outil</div>
+      <button class="tuto-close" onclick="closeTuto()" title="Fermer">✕</button>
+    </div>
+    <div class="tuto-progress" id="tutoDots"></div>
+    <div class="tuto-body" id="tutoBody"></div>
+    <div class="tuto-footer">
+      <span class="tuto-counter" id="tutoCounter"></span>
+      <div class="tuto-nav">
+        <button class="tuto-btn" id="tutoPrev" onclick="tutoNav(-1)">← Précédent</button>
+        <button class="tuto-btn primary" id="tutoNext" onclick="tutoNav(1)">Suivant →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================
+   CONFIG
+================================================ */
+const APS  = "Course de Relais";
+const CODE = "CR";
+const VERSION = "v4-indice";
+const STORAGE_KEY = "outil_eps_cr_2026_v4";
+
+const OBS = [
+  { id:"OBS01", label:"OBS-01 QC", nom:"Qualité collective du relais",
+    codes:{ A:"QC-", B:"QC~", C:"QC+" },
+    desc:{ A:"Relais discontinu",B:"Relais coordonné",C:"Relais fluide" } },
+  { id:"OBS02", label:"OBS-02 Perf", nom:"Performance équipe",
+    codes:{ A:"PF-", B:"PF~", C:"PF+" },
+    desc:{ A:"Faible",B:"Moyenne",C:"Élevée" } },
+  { id:"OBS03", label:"OBS-03 QT", nom:"Qualité de transmission",
+    codes:{ A:"QT-", B:"QT~", C:"QT+" },
+    desc:{ A:"Imprécise",B:"Fonctionnelle",C:"Maîtrisée" } }
+];
+
+const SCORES = { A:3, B:6, C:9 };
+const SEUILS = { C:7.5, B:4.5 };
+
+const SA = {
+  "SA-A1": "Jeu de la marque (construction du repère)",
+  "SA-B1": "Relais en dissociation (maintien vitesse)",
+  "SA-C1": "Projet tactique collectif (optimisation)"
+};
+
+const AXES = [
+  { id:1, obs:"OBS03",
+    titre:"Construction et régulation de la marque de passage pour synchroniser les vitesses",
+    lacune:"N1-6 — ajustement des vitesses insuffisant",impact:"N2-6d · N2-6e",sa:"SA-A1",
+    consA:"Poser une marque au sol et déclencher son élan lorsque le donneur la franchit",
+    consB:"Affiner la marque après chaque passage selon l'écart de vitesses observé",
+    consC:"Personnaliser la marque selon son profil physique et améliorer l'indice de transmission",
+    critA:"Le receveur s'élance avant que le donneur n'arrive à hauteur",
+    critB:"L'écart de vitesses visible à la transmission diminue d'un passage à l'autre",
+    critC:"L'indice de transmission est positif (équipe plus rapide en relais qu'en individuel)",
+    conduite:"Le receveur s'élance depuis sa marque sans regarder en arrière dans au moins 2 passages sur 3" },
+  { id:2, obs:"OBS03",
+    titre:"Dissociation segmentaire train supérieur/inférieur pour transmettre sans décélérer",
+    lacune:"N1-5 — QT- dominant",impact:"N2-6b · N2-6c",sa:"SA-B1",
+    consA:"Exercice bras-course : courir en tendant le bras arrière sans ralentir sur 20m",
+    consB:"Transmettre le témoin à pleine course sur un signal verbal du donneur",
+    consC:"Coordonner courir / donner signal / identifier main / transmettre en une action fluide",
+    critA:"Le donneur ne ralentit pas visiblement lors de la transmission",
+    critB:"La transmission a lieu sans que les relayeurs ne se retournent",
+    critC:"Le témoin est transmis en zone sans rupture de rythme observable",
+    conduite:"Le donneur maintient sa vitesse maximale jusqu'au passage du témoin sans hésitation visible" },
+  { id:3, obs:"OBS03",
+    titre:"Posture du receveur : prise d'informations vers l'arrière en action",
+    lacune:"N1-3 — qualité de transmission insuffisante",impact:"N2-6d · N2-6e",sa:"SA-A1",
+    consA:"Marcher-courir en regardant en diagonale arrière pour toucher la main du partenaire",
+    consB:"Présenter la main receveuse en courant sur réaction au signal verbal",
+    consC:"Intégrer posture et vitesse en situation de relais 4x50m",
+    critA:"Le receveur tourne seulement la tête (pas le corps) pour regarder en arrière",
+    critB:"La main receveuse est présentée avant que le donneur n'arrive",
+    critC:"Transmission correcte sans aucun regard en arrière",
+    conduite:"Le receveur présente sa main receveuse en courant sans se retourner lors de 2 passages sur 3" },
+  { id:4, obs:"OBS01",
+    titre:"Communication collective sur critères précis pour réguler le projet tactique",
+    lacune:"N1-7 — QC- / QC~",impact:"N2-1",sa:"SA-C1",
+    consA:"Nommer un critère observable après chaque relais (écart, timing, zone)",
+    consB:"Proposer un ajustement de marque ou d'ordre de passage basé sur le chrono",
+    consC:"Définir collectivement un projet tactique en fonction des ressources de chacun",
+    critA:"L'équipe identifie au moins un problème après chaque passage",
+    critB:"L'équipe propose un ajustement mesurable entre deux passages",
+    critC:"Le projet tactique est formalisé et améliore l'indice de transmission",
+    conduite:"L'équipe ajuste sa marque de passage après chaque relais en utilisant des critères observables" },
+  { id:5, obs:"OBS01",
+    titre:"Enchaînement des efforts anaérobies avec récupération entre passages",
+    lacune:"N1-1 — épuisement précoce (QC-)",impact:"N2-2 · N2-5",sa:"SA-B1",
+    consA:"Alterner sprint 30m / marche 30m x 4 : gérer sa récupération",
+    consB:"Répéter 3 relais complets en maintenant un écart chrono < 2 sec",
+    consC:"Optimiser l'ordre de passage selon les ressources physiques individuelles",
+    critA:"Chaque relayeur est disposé à courir à son tour sans temps mort excessif",
+    critB:"La vitesse du dernier relayeur est comparable à celle du premier",
+    critC:"Le classement des relayeurs par ordre de passage maximise la performance collective",
+    conduite:"Chaque relayeur maintient sa vitesse de course du départ jusqu'à la transmission sans décélération visible" },
+  { id:6, obs:"OBS01",
+    titre:"Direction de course dans le couloir à vitesse maximale, sans dérive latérale",
+    lacune:"N1-4 — dérive latérale (QC-)",impact:"N2-3 · N2-4",sa:"SA-B1",
+    consA:"Courir entre deux lignes espacées de 1m sur 50m sans les toucher",
+    consB:"Maintenir la direction en accélérant et en transmettant le témoin",
+    consC:"Intégrer alignement et dissociation en relais complet",
+    critA:"Aucune sortie de couloir sur les 50m",
+    critB:"La ligne de course reste droite même lors de la phase de transmission",
+    critC:"L'alignement corps/forces est maintenu sur tout le relais",
+    conduite:"Le relayeur court en ligne droite dans son couloir sans sortie latérale sur les 50m" }
+];
+
+const DISTRIB = {
+  3:{ 6:[2,2,2], 7:[2,2,3], 8:[3,2,3], 9:[3,3,3], 10:[3,4,3] },
+  4:{ 6:[1,2,2,1], 7:[2,2,2,1], 8:[2,2,2,2], 9:[2,3,2,2], 10:[3,2,3,2] }
+};
+
+/* ================================================
+   ÉTAT
+================================================ */
+let eleves = [];
+let selectedAxes = [];
+let comparaisonRef = null;
+let nbSeances = 6;
+let currentStep = 0;
+let rowCount = 0;
+
+/* ================================================
+   BARÈME & DISTANCE
+================================================ */
+const BAREME_50_OUTIL = { G:{C:28.5,B:36.0}, F:{C:33.0,B:42.0} };
+let DISTANCE_OUTIL = 50;
+let CHRONO_SEUILS = calculerSeuilsOutil(DISTANCE_OUTIL);
+
+function calculerSeuilsOutil(distance){
+  const ratio = distance/50;
+  return {
+    G:{ C:Math.round(BAREME_50_OUTIL.G.C*ratio*10)/10, B:Math.round(BAREME_50_OUTIL.G.B*ratio*10)/10 },
+    F:{ C:Math.round(BAREME_50_OUTIL.F.C*ratio*10)/10, B:Math.round(BAREME_50_OUTIL.F.B*ratio*10)/10 }
+  };
+}
+
+function onDistanceChangeOutil(){
+  const sel = document.getElementById('distanceSelectOutil');
+  DISTANCE_OUTIL = parseInt(sel.value,10);
+  CHRONO_SEUILS = calculerSeuilsOutil(DISTANCE_OUTIL);
+  updateBaremePreview();
+  document.querySelectorAll('#rowsContainer .chrono-input-saisie').forEach(input=>{ updateChronoNiveau(input); });
+  saveState();
+}
+
+function updateBaremePreview(){
+  const s = CHRONO_SEUILS;
+  const bar = document.getElementById('fourchette-bar');
+  if(!bar) return;
+  bar.style.display = 'flex';
+  document.getElementById('fbG-c').innerHTML = `C ≤${s.G.C}"`;
+  document.getElementById('fbG-b').innerHTML = `B ${(Math.round((s.G.C+0.1)*10)/10)}"–${s.G.B}"`;
+  document.getElementById('fbG-a').innerHTML = `A &gt;${s.G.B}"`;
+  document.getElementById('fbF-c').innerHTML = `C ≤${s.F.C}"`;
+  document.getElementById('fbF-b').innerHTML = `B ${(Math.round((s.F.C+0.1)*10)/10)}"–${s.F.B}"`;
+  document.getElementById('fbF-a').innerHTML = `A &gt;${s.F.B}"`;
+}
+
+/* ================================================
+   PERSISTANCE
+================================================ */
+function saveState(){
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      eleves,selectedAxes,nbSeances,rowCount,distance:DISTANCE_OUTIL,version:VERSION
+    }));
+    updateSessionStatus("Session sauvegardée automatiquement");
+  } catch(e){ console.warn(e); }
+}
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const state = JSON.parse(raw);
+    if(state.version !== VERSION){ console.warn("Version incompatible"); return false; }
+    eleves = state.eleves||[];
+    selectedAxes = state.selectedAxes||[];
+    nbSeances = state.nbSeances||6;
+    rowCount = state.rowCount||0;
+    DISTANCE_OUTIL = state.distance||50;
+    CHRONO_SEUILS = calculerSeuilsOutil(DISTANCE_OUTIL);
+    const distSel = document.getElementById("distanceSelectOutil");
+    if(distSel) distSel.value = String(DISTANCE_OUTIL);
+    return true;
+  } catch(e){ return false; }
+}
+
+function updateSessionStatus(msg){
+  const el = document.getElementById("session-status");
+  if(el){ el.textContent = msg + " — " + new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}); }
+}
+
+/* ================================================
+   NAVIGATION
+================================================ */
+function goStep(n){
+  const sections=["sec-saisie","sec-step1","sec-step2","sec-step3","sec-step4"];
+  const tabs=["tab0","tab1","tab2","tab3","tab4"];
+  sections.forEach((s,i)=>{
+    const el=document.getElementById(s);
+    el.style.display=(i===n)?"block":"none";
+    if(i===n){ el.classList.remove("fade-in"); void el.offsetWidth; el.classList.add("fade-in"); }
+  });
+  tabs.forEach((t,i)=>{
+    const el=document.getElementById(t);
+    el.classList.remove("active","done");
+    if(i===n) el.classList.add("active");
+    else if(i<n) el.classList.add("done");
+  });
+  currentStep=n;
+  if(n===2) renderAxes();
+  if(n===3) updateSlider();
+  window.scrollTo(0,0);
+}
+
+/* ================================================
+   SAISIE — LIGNES (avec relayeurs individuels)
+================================================ */
+function addRow(data){
+  rowCount++;
+  const rid = "row"+rowCount;
+  const d = data || { nom:"", d1:"", d3:"", chrono:"", genre:"", relayeurs:[] };
+  const rl = d.relayeurs||[];
+
+  // Générer les 4 lignes de relayeurs
+  let rlHtml = '';
+  for(let i=1;i<=4;i++){
+    const r = rl[i-1]||{nom:"",chrono:""};
+    rlHtml += `<div class="relayeur-row" id="${rid}-rl${i}">
+      <span class="rl-num">${i}</span>
+      <input class="rl-name" type="text" placeholder="Relayeur ${i}" value="${r.nom||''}" title="Nom du relayeur ${i}">
+      <input class="rl-chrono" type="text" placeholder='ex: 7"2' value="${r.chrono||''}" title="Chrono individuel relayeur ${i} sur ${DISTANCE_OUTIL}m">
+      <span class="rl-indice" id="${rid}-rl${i}-indice">—</span>
+    </div>`;
+  }
+
+  const html = `<div class="saisie-grid" id="${rid}">
+    <input class="name-input" type="text" placeholder="Prénom ou Équipe..." value="${d.nom}">
+    <div class="deg-sel" data-obs="OBS01">
+      <button class="d-btn${d.d1==="A"?" sA":""}" onclick="selDeg(this,'A')">A</button>
+      <button class="d-btn${d.d1==="B"?" sB":""}" onclick="selDeg(this,'B')">B</button>
+      <button class="d-btn${d.d1==="C"?" sC":""}" onclick="selDeg(this,'C')">C</button>
+    </div>
+    <div class="chrono-cell" data-obs="OBS02">
+      <input class="chrono-input-saisie" type="text" placeholder='28"5' value="${d.chrono||''}"
+        oninput="updateChronoNiveau(this)"
+        style="width:42px;font-size:11px;text-align:center;border:1px solid var(--border);border-radius:2px;padding:2px">
+      <button class="genre-btn-saisie${d.genre==='G'?' sel-g':''}" onclick="setGenreSaisie(this,'G')"
+        style="font-size:9px;padding:2px 4px;border:1px solid var(--border);border-radius:2px;cursor:pointer;background:#fff">G</button>
+      <button class="genre-btn-saisie${d.genre==='F'?' sel-f':''}" onclick="setGenreSaisie(this,'F')"
+        style="font-size:9px;padding:2px 4px;border:1px solid var(--border);border-radius:2px;cursor:pointer;background:#fff">F</button>
+      <span class="chrono-niveau-badge" style="font-size:9px;font-weight:bold;color:#aaa">—</span>
+    </div>
+    <div class="deg-sel" data-obs="OBS03">
+      <button class="d-btn${d.d3==="A"?" sA":""}" onclick="selDeg(this,'A')">A</button>
+      <button class="d-btn${d.d3==="B"?" sB":""}" onclick="selDeg(this,'B')">B</button>
+      <button class="d-btn${d.d3==="C"?" sC":""}" onclick="selDeg(this,'C')">C</button>
+    </div>
+    <div class="relayeur-zone">
+      <div class="rz-title">⚡ Relayeurs — Chrono individuel (${DISTANCE_OUTIL}m)</div>
+      ${rlHtml}
+      <button class="btn-calc-indice" onclick="calcIndiceRow('${rid}')" style="margin-top:4px">⚡ Calc. Indice</button>
+      <div class="indice-result" id="${rid}-indice-result" style="display:none"></div>
+    </div>
+    <button class="del-btn" onclick="delRow('${rid}')">✕</button>
+  </div>`;
+
+  document.getElementById("rowsContainer").insertAdjacentHTML("beforeend",html);
+  if(d.genre) updateChronoNiveau(document.getElementById(rid).querySelector(".chrono-input-saisie"));
+}
+
+/* ================================================
+   CALCUL INDICE DE RELAIS (par ligne de saisie)
+================================================ */
+function calcIndiceRow(rid){
+  const rowEl = document.getElementById(rid);
+  if(!rowEl) return;
+
+  // Chrono collectif de l'équipe (OBS-02)
+  const chronoInput = rowEl.querySelector(".chrono-input-saisie");
+  const chronoCollectif = parseFloat((chronoInput?chronoInput.value:"").replace(",",".").replace('"',"."));
+
+  // Chronos individuels des 4 relayeurs
+  let sumIndiv = 0, countOk = 0;
+  const rlData = [];
+  for(let i=1;i<=4;i++){
+    const rlRow = document.getElementById(`${rid}-rl${i}`);
+    if(!rlRow) continue;
+    const chronoInput = rlRow.querySelector(".rl-chrono");
+    const nomInput = rlRow.querySelector(".rl-name");
+    const chronoVal = parseFloat((chronoInput?chronoInput.value:"").replace(",",".").replace('"',"."));
+    const nomVal = nomInput ? nomInput.value.trim() : `R${i}`;
+    const indiceEl = document.getElementById(`${rid}-rl${i}-indice`);
+
+    if(!isNaN(chronoVal) && chronoVal > 0){
+      sumIndiv += chronoVal;
+      countOk++;
+      rlData.push({num:i, nom:nomVal||`R${i}`, chrono:chronoVal});
+      if(indiceEl) indiceEl.textContent = `${chronoVal}"`;
+    } else {
+      rlData.push({num:i, nom:nomVal||`R${i}`, chrono:null});
+      if(indiceEl){ indiceEl.textContent = "—"; indiceEl.className = "rl-indice"; }
+    }
+  }
+
+  const resultEl = document.getElementById(`${rid}-indice-result`);
+  if(!resultEl) return;
+
+  // Vérification : on a besoin d'au moins le chrono collectif + 1 relayeur
+  if(isNaN(chronoCollectif) || chronoCollectif <= 0){
+    resultEl.style.display = "block";
+    resultEl.className = "indice-result ir-neu";
+    resultEl.innerHTML = "⚠ Saisissez d'abord le chrono collectif de l'équipe (OBS-02).";
+    return;
+  }
+  if(countOk === 0){
+    resultEl.style.display = "block";
+    resultEl.className = "indice-result ir-neu";
+    resultEl.innerHTML = "⚠ Saisissez les chronos individuels d'au moins un relayeur.";
+    return;
+  }
+
+  // Somme théorique = somme des chronos individuels (= ce que l'équipe ferait SANS transmissions)
+  // Indice = Somme_individuelle - Chrono_collectif
+  // Si Indice > 0 : les transmissions améliorent la performance (POSITIF ✅)
+  // Si Indice < 0 : les transmissions font perdre du temps (NÉGATIF ❌)
+  // Si Indice ≈ 0 : neutre
+  const indiceVal = sumIndiv - chronoCollectif;
+  const indicePct = chronoCollectif > 0 ? (indiceVal / chronoCollectif * 100).toFixed(1) : 0;
+  const indiceSign = indiceVal > 0.5 ? "pos" : indiceVal < -0.5 ? "neg" : "neu";
+  const icons = { pos:"✅", neg:"❌", neu:"⚠" };
+  const labels = {
+    pos:`Les transmissions AMÉLIORENT la performance collective (gain de ${indiceVal.toFixed(2)}" / +${indicePct}%)`,
+    neg:`Les transmissions FREINENT la performance collective (perte de ${Math.abs(indiceVal).toFixed(2)}" / ${indicePct}%)`,
+    neu:`Transmissions NEUTRES — l'effet des passages est quasi nul (${indiceVal.toFixed(2)}")`
+  };
+
+  // Calcul par relayeur : écart de son chrono indiv vs chrono collectif / 4
+  let detailHtml = rlData.filter(r=>r.chrono!==null).map(r=>{
+    const ref = chronoCollectif / 4;
+    const diff = r.chrono - ref;
+    const cls = diff < -0.3 ? "indice-pos" : diff > 0.3 ? "indice-neg" : "indice-neu";
+    const sym = diff < -0.3 ? "↑" : diff > 0.3 ? "↓" : "≈";
+    return `<span style="margin-right:6px"><strong>${r.nom}</strong>: ${r.chrono}" <span class="${cls}">${sym}${diff>=0?"+":""}${diff.toFixed(2)}"</span></span>`;
+  }).join("");
+
+  resultEl.style.display = "block";
+  resultEl.className = `indice-result ir-${indiceSign}`;
+  resultEl.innerHTML =
+    `<strong>${icons[indiceSign]} Indice de Relais : ${indiceVal>=0?"+":""}${indiceVal.toFixed(2)}" (${indicePct}%)</strong><br>
+    ${labels[indiceSign]}<br>
+    <span style="font-size:8px;color:#888">Σ chronos indiv. = ${sumIndiv.toFixed(2)}" | Perf. collective = ${chronoCollectif}"</span><br>
+    ${detailHtml ? `<div style="margin-top:3px;font-size:8.5px">${detailHtml}</div>` : ""}`;
+
+  // Mémoriser dans l'objet eleve si déjà analysé
+  saveState();
+}
+
+/* ================================================
+   CHRONO → NIVEAU
+================================================ */
+function chronoVersNiveau(val, genre){
+  if(!val||!genre) return "";
+  const v = parseFloat(String(val).trim().replace(",",".").replace('"',"."));
+  if(isNaN(v)||v<=0) return "";
+  const s = CHRONO_SEUILS[genre];
+  if(v<=s.C) return "C";
+  if(v<=s.B) return "B";
+  return "A";
+}
+
+function setGenreSaisie(btn, g){
+  const cell = btn.closest(".chrono-cell");
+  cell.querySelectorAll(".genre-btn-saisie").forEach(b=>b.className="genre-btn-saisie");
+  btn.classList.add(g==="G"?"sel-g":"sel-f");
+  updateChronoNiveau(cell.querySelector(".chrono-input-saisie"));
+}
+
+function updateChronoNiveau(input){
+  const cell = input.closest(".chrono-cell");
+  const gBtn = cell.querySelector(".genre-btn-saisie.sel-g");
+  const fBtn = cell.querySelector(".genre-btn-saisie.sel-f");
+  const genre = gBtn?"G":fBtn?"F":"";
+  const niv = chronoVersNiveau(input.value, genre);
+  const badge = cell.querySelector(".chrono-niveau-badge");
+  badge.textContent = niv||"—";
+  badge.style.color = niv==="C"?"#1a5e0a":niv==="B"?"#b8470f":niv==="A"?"#8b1a1a":"#aaa";
+  saveState();
+}
+
+function selDeg(btn, deg){
+  const grp = btn.closest(".deg-sel");
+  const was = btn.classList.contains("s"+deg);
+  grp.querySelectorAll(".d-btn").forEach(b=>b.className="d-btn");
+  if(!was) btn.classList.add("s"+deg);
+  saveState();
+}
+
+function delRow(id){ const el=document.getElementById(id); if(el) el.remove(); saveState(); }
+
+function getRowData(rowEl){
+  const nom = rowEl.querySelector("input.name-input").value.trim();
+  const degSels = rowEl.querySelectorAll(".deg-sel");
+  const getSel = grp=>{ const sel=grp?grp.querySelector(".d-btn.sA,.d-btn.sB,.d-btn.sC"):null; return sel?sel.textContent.trim():""; };
+  const d1=getSel(degSels[0]);
+  const d3=getSel(degSels[1]);
+  const chronoCell = rowEl.querySelector(".chrono-cell");
+  let chrono="",genre="";
+  if(chronoCell){
+    const ci = chronoCell.querySelector(".chrono-input-saisie");
+    chrono = ci?ci.value.trim():"";
+    const gBtn=chronoCell.querySelector(".genre-btn-saisie.sel-g");
+    const fBtn=chronoCell.querySelector(".genre-btn-saisie.sel-f");
+    genre = gBtn?"G":fBtn?"F":"";
+  }
+  const d2 = chronoVersNiveau(chrono, genre);
+
+  // Récupérer les relayeurs individuels
+  const rowId = rowEl.id;
+  const relayeurs = [];
+  for(let i=1;i<=4;i++){
+    const rlRow = document.getElementById(`${rowId}-rl${i}`);
+    if(rlRow){
+      const rlNom = rlRow.querySelector(".rl-name").value.trim();
+      const rlChrono = rlRow.querySelector(".rl-chrono").value.trim();
+      relayeurs.push({nom:rlNom||`R${i}`, chrono:rlChrono});
+    }
+  }
+  return { nom, degs:[d1,d2,d3], chrono, genre, relayeurs };
+}
+
+function showAlert(msg,type){ document.getElementById("alert-zone").innerHTML=`<div class="alert ${type}">${msg}</div>`; }
+function clearAlert(){ document.getElementById("alert-zone").innerHTML=""; }
+
+/* ================================================
+   ANALYSE
+================================================ */
+function imprimerBilan(){
+  const searchInput = document.getElementById("filterSearchInput");
+  if(searchInput) searchInput.value = "";
+  setFiltreProfil("ALL");
+  setTimeout(()=>{ window.print(); }, 50);
+}
+
+/* ================================================
+   RECHERCHE / FILTRE DU TABLEAU INDIVIDUEL
+   ================================================ */
+let filtreProfilActuel = "ALL";
+
+function filtrerTableau(){
+  const searchInput = document.getElementById("filterSearchInput");
+  const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+  const table = document.getElementById("dataTableIndiv");
+  if(!table) return;
+  const rows = table.querySelectorAll("tbody tr");
+  let visibleCount = 0;
+  rows.forEach(row=>{
+    const nom = row.getAttribute("data-nom") || "";
+    const prof = row.getAttribute("data-profil") || "";
+    const matchNom = !query || nom.includes(query);
+    const matchProfil = filtreProfilActuel === "ALL" || prof === filtreProfilActuel;
+    const visible = matchNom && matchProfil;
+    row.classList.toggle("row-hidden", !visible);
+    if(visible) visibleCount++;
+  });
+  const countEl = document.getElementById("filterCount");
+  if(countEl) countEl.textContent = `${visibleCount} / ${rows.length} affiché(s)`;
+}
+
+function setFiltreProfil(profilVal){
+  filtreProfilActuel = profilVal;
+  const group = document.getElementById("filterProfilGroup");
+  if(group){
+    group.querySelectorAll(".filter-chip").forEach(chip=>{
+      chip.classList.toggle("active", chip.getAttribute("data-profil") === profilVal);
+    });
+  }
+  filtrerTableau();
+}
+
+function profil(score){
+  if(score>=SEUILS.C) return "C";
+  if(score>=SEUILS.B) return "B";
+  return "A";
+}
+
+function analyser(){
+  clearAlert();
+  const rows = document.querySelectorAll("#rowsContainer .saisie-grid");
+  eleves = [];
+  let errors = 0;
+  rows.forEach(row=>{
+    const {nom,degs,chrono,genre,relayeurs} = getRowData(row);
+    if(!nom){ errors++; return; }
+    const missing = degs.filter(d=>!d).length;
+    if(missing>0){ errors++; showAlert(`"${nom}" — ${missing} observable(s) non renseigné(s).`,"err"); return; }
+    const scores = degs.map(d=>SCORES[d]);
+    const moy = scores.reduce((a,b)=>a+b,0)/scores.length;
+    const profG = profil(moy);
+    const profsD = scores.map(s=>profil(s));
+    const lacunes = scores.map((s,i)=>({obs:OBS[i],score:s,deg:degs[i]}))
+      .filter(x=>x.score<SEUILS.B).sort((a,b)=>a.score-b.score);
+    const axePrio = lacunes.length>0 ? AXES.find(ax=>ax.obs===lacunes[0].obs.id)||AXES[0] : AXES[5];
+    const saPrio = lacunes.length>0 ? axePrio.sa : "SA-C1";
+
+    // Calculer l'indice de relais depuis les données
+    const chronoCollectif = parseFloat(String(chrono).replace(",",".").replace('"',"."));
+    let sumIndiv = 0, countRL = 0;
+    const relayeursData = [];
+    relayeurs.forEach((r,i)=>{
+      const cv = parseFloat(String(r.chrono||"").replace(",",".").replace('"',"."));
+      if(!isNaN(cv)&&cv>0){ sumIndiv+=cv; countRL++; }
+      relayeursData.push({nom:r.nom||`R${i+1}`, chrono:isNaN(cv)||cv<=0?null:cv});
+    });
+    let indiceRelais = null;
+    if(!isNaN(chronoCollectif)&&chronoCollectif>0&&countRL>0){
+      indiceRelais = sumIndiv - chronoCollectif;
+    }
+
+    eleves.push({ nom, degs, scores, moy, profG, profsD, lacunes, axePrio, saPrio, chrono, genre, relayeurs:relayeursData, indiceRelais, chronoCollectif });
+  });
+  if(eleves.length===0){ showAlert("Aucun élève valide. Ajoutez des lignes complètes.","err"); return; }
+  eleves.sort((a,b)=>b.moy-a.moy);
+  eleves.forEach((e,i)=>e.rang=i+1);
+  saveState();
+  renderStep1();
+  goStep(1);
+}
+
+/* ================================================
+   ÉTAPE 1 — DIAGNOSTIC + TABLEAU INDICE
+================================================ */
+function renderStep1(){
+  const totA=eleves.filter(e=>e.profG==="A").length;
+  const totB=eleves.filter(e=>e.profG==="B").length;
+  const totC=eleves.filter(e=>e.profG==="C").length;
+  const n=eleves.length;
+  let dom=totA>=totB&&totA>=totC?"A":totB>=totA&&totB>=totC?"B":"C";
+
+  /* Dashboard */
+  const dashEl = document.getElementById('dashboard-content');
+  if(dashEl){
+    dashEl.innerHTML=`<p>🔴 Débutants A: <strong>${totA}</strong> &nbsp;|&nbsp; 🟡 Intermédiaires B: <strong>${totB}</strong> &nbsp;|&nbsp; 🟢 Avancés C: <strong>${totC}</strong></p>
+    <p><strong>Cycle recommandé :</strong> ${dom==="A"?"Remédiation":dom==="B"?"Consolidation":"Optimisation"}</p>`;
+  }
+
+  /* Tableau individuel */
+  let tbl=`<div class="table-filter-bar">
+    <input type="text" id="filterSearchInput" class="filter-search" placeholder="🔍 Rechercher un élève ou une équipe..." oninput="filtrerTableau()">
+    <div class="filter-profil-group" id="filterProfilGroup">
+      <button class="filter-chip active" data-profil="ALL" onclick="setFiltreProfil('ALL')">Tous</button>
+      <button class="filter-chip fA" data-profil="A" onclick="setFiltreProfil('A')">A</button>
+      <button class="filter-chip fB" data-profil="B" onclick="setFiltreProfil('B')">B</button>
+      <button class="filter-chip fC" data-profil="C" onclick="setFiltreProfil('C')">C</button>
+    </div>
+    <span class="filter-count" id="filterCount"></span>
+  </div>
+  <div style="overflow-x:auto;margin-bottom:16px"><table class="data-table" id="dataTableIndiv">
+  <thead><tr>
+    <th>Rang</th><th>Prénom/Équipe</th>
+    ${OBS.map(o=>`<th>${o.label}</th>`).join("")}
+    <th>Chrono collectif</th>
+    <th>Profil</th><th>Détail</th><th>Lacune 1</th><th>SA</th>
+  </tr></thead><tbody>`;
+  eleves.forEach(e=>{
+    const l1=e.lacunes.length>0?`${e.lacunes[0].obs.label} (${e.lacunes[0].deg})`:"Aucune";
+    const chronoTxt = e.chrono ? `${e.chrono}"${e.genre?' · '+e.genre:''}` : "—";
+    tbl+=`<tr class="p${e.profG}" data-nom="${e.nom.toLowerCase()}" data-profil="${e.profG}">
+      <td class="rank">${e.rang}</td>
+      <td class="left"><strong>${e.nom}</strong></td>
+      ${e.degs.map((d,i)=>`<td><strong>${OBS[i].codes[d]}</strong></td>`).join("")}
+      <td style="font-family:var(--font);font-size:10px;white-space:nowrap">${chronoTxt}</td>
+      <td><strong>${e.profG}</strong></td>
+      <td style="font-family:var(--font);font-size:9px">${e.profsD.join(" / ")}</td>
+      <td style="font-size:9px">${l1}</td>
+      <td style="font-size:9px">${e.saPrio}</td>
+    </tr>`;
+  });
+  tbl+="</tbody></table></div>";
+
+  /* ===== TABLEAU INDICE DE RELAIS ===== */
+  const eleveAvecIndice = eleves.filter(e=>e.indiceRelais!==null);
+  let indicePanelHtml = "";
+  if(eleveAvecIndice.length > 0){
+    // Calculer max absolu pour sparkbars
+    const maxAbs = Math.max(...eleveAvecIndice.map(e=>Math.abs(e.indiceRelais||0)), 0.1);
+
+    let rlTblBody = "";
+    eleves.forEach(e=>{
+      // Lignes par relayeur
+      let rlRowsHtml = "";
+      if(e.relayeurs && e.relayeurs.length > 0){
+        e.relayeurs.forEach((r,i)=>{
+          if(!r.chrono) return;
+          const ref = e.chronoCollectif > 0 ? e.chronoCollectif / 4 : null;
+          const diff = ref ? r.chrono - ref : null;
+          const cls = diff!==null ? (diff<-0.3?"indice-pos":diff>0.3?"indice-neg":"indice-neu") : "";
+          const sym = diff!==null ? (diff<-0.3?"↑ rapide":diff>0.3?"↓ lent":"≈ moyen") : "";
+          rlRowsHtml += `<tr style="background:#fafafe">
+            <td style="padding-left:18px;font-size:9px;color:#888;text-align:left">└ ${r.nom}</td>
+            <td style="font-size:9px">${r.chrono}"</td>
+            <td colspan="3" style="font-size:9px;text-align:left">
+              ${diff!==null?`<span class="${cls}">${sym} (${diff>=0?"+":""}${diff.toFixed(2)}" vs ref ${ref?ref.toFixed(2):"?"}"/relayeur)</span>`:'—'}
+            </td>
+          </tr>`;
+        });
+      }
+
+      if(e.indiceRelais !== null){
+        const iv = e.indiceRelais;
+        const sign = iv>0.5?"pos":iv<-0.5?"neg":"neu";
+        const icon = {pos:"✅",neg:"❌",neu:"⚠"}[sign];
+        const pct = e.chronoCollectif>0?(iv/e.chronoCollectif*100).toFixed(1):0;
+        const barW = Math.round(Math.abs(iv)/maxAbs*80);
+        const barColor = {pos:"#5a9e3a",neg:"#d9534f",neu:"#ff6b35"}[sign];
+        const label = {
+          pos:`+${iv.toFixed(2)}" / +${pct}% (transmissions efficaces)`,
+          neg:`${iv.toFixed(2)}" / ${pct}% (transmissions coûteuses)`,
+          neu:`${iv.toFixed(2)}" / ${pct}% (effet neutre)`
+        }[sign];
+        rlTblBody += `<tr class="p${e.profG}" style="font-weight:bold">
+          <td class="left">${icon} <strong>${e.nom}</strong></td>
+          <td>${e.chrono}"${e.genre?' '+e.genre:''}</td>
+          <td>${e.relayeurs.filter(r=>r.chrono).reduce((s,r)=>s+r.chrono,0).toFixed(2)}"</td>
+          <td>
+            <span class="indice-badge ib-${sign}">${iv>=0?"+":""}${iv.toFixed(2)}"</span>
+            <span class="indice-sparkbar" style="background:${barColor};width:${barW}px;margin-left:4px"></span>
+          </td>
+          <td style="font-size:9px;text-align:left">${label}</td>
+        </tr>` + rlRowsHtml;
+      } else {
+        rlTblBody += `<tr class="p${e.profG}">
+          <td class="left">${e.nom}</td>
+          <td>${e.chrono||"—"}</td>
+          <td colspan="3" style="font-size:9px;color:var(--muted)">— Chronos individuels non saisis</td>
+        </tr>`;
+      }
+    });
+
+    const mIndice = eleveAvecIndice.reduce((s,e)=>s+e.indiceRelais,0)/eleveAvecIndice.length;
+    const mSign = mIndice>0.5?"pos":mIndice<-0.5?"neg":"neu";
+
+    indicePanelHtml = `
+    <div class="indice-panel">
+      <div class="indice-panel-head">
+        ⚡ Indice de Relais — Performance individuelle vs Performance collective
+        <span style="font-size:9px;opacity:.8">Moyenne classe : ${mIndice>=0?"+":""}${mIndice.toFixed(2)}"</span>
+      </div>
+      <div class="indice-panel-body">
+        <div class="indice-explainer">
+          <strong>Formule :</strong> Indice = Σ Chronos individuels (${DISTANCE_OUTIL}m) − Chrono collectif (4×${DISTANCE_OUTIL}m)<br>
+          <span style="color:var(--Ct)">✅ Indice positif</span> → les transmissions <strong>font gagner du temps</strong> à l'équipe (relais efficace)&nbsp;&nbsp;
+          <span style="color:var(--At)">❌ Indice négatif</span> → les transmissions <strong>font perdre du temps</strong> (ruptures, hésitations)<br>
+          Pour chaque relayeur : comparaison de son chrono individuel avec la référence = Perf. collective ÷ 4.
+        </div>
+        <div style="overflow-x:auto">
+        <table class="indice-table">
+          <thead><tr>
+            <th>Équipe / Relayeur</th>
+            <th>Chrono collectif</th>
+            <th>Σ Chronos indiv.</th>
+            <th>Indice de Relais</th>
+            <th>Interprétation</th>
+          </tr></thead>
+          <tbody>${rlTblBody}</tbody>
+        </table>
+        </div>
+        <div class="decision-box d${mSign}" style="margin-top:10px;font-size:10px">
+          <strong>Décision collective (indice moyen) :</strong>
+          ${{
+            pos:`L'effet des transmissions est globalement <strong>positif</strong> (+${mIndice.toFixed(2)}"). Axes à consolider : optimisation de l'ordre de passage et de la marque (Axe 1).`,
+            neg:`L'effet des transmissions est globalement <strong>négatif</strong> (${mIndice.toFixed(2)}"). Priorité : travail sur la dissociation et la transmission sans décélération (Axes 2 & 3).`,
+            neu:`L'effet des transmissions est <strong>neutre</strong>. Potentiel d'amélioration via la marque de passage et la communication (Axes 1 & 4).`
+          }[mSign]}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* Cartes */
+  const cards=`<div class="cards">
+    <div class="card cA"><div class="cval">${totA}</div><div class="clab">Débutants A<br>${Math.round(totA/n*100)}%</div></div>
+    <div class="card cB"><div class="cval">${totB}</div><div class="clab">Intermédiaires B<br>${Math.round(totB/n*100)}%</div></div>
+    <div class="card cC"><div class="cval">${totC}</div><div class="clab">Avancés C<br>${Math.round(totC/n*100)}%</div></div>
+    <div class="card c${dom}"><div class="cval">${dom}</div><div class="clab">Profil dominant<br>de la classe</div></div>
+  </div>`;
+
+  /* Graphique SVG natif — répartition A/B/C (sans dépendance externe) */
+  const maxBar = Math.max(totA, totB, totC, 1);
+  const barH = (v) => Math.round((v/maxBar) * 90);
+  const repartChart = `<div class="chart-box">
+    <div class="chart-title">📊 Répartition des profils de la classe</div>
+    <svg viewBox="0 0 260 130" width="100%" height="130" style="max-width:320px;display:block;margin:0 auto" role="img" aria-label="Répartition des profils A B C de la classe">
+      <line x1="20" y1="110" x2="250" y2="110" stroke="var(--border)" stroke-width="1"/>
+      <g>
+        <rect x="40" y="${110-barH(totA)}" width="46" height="${barH(totA)}" fill="var(--A2)" rx="2"/>
+        <text x="63" y="${110-barH(totA)-6}" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--At)" font-family="var(--font)">${totA}</text>
+        <text x="63" y="124" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--font)">A</text>
+      </g>
+      <g>
+        <rect x="107" y="${110-barH(totB)}" width="46" height="${barH(totB)}" fill="var(--B2)" rx="2"/>
+        <text x="130" y="${110-barH(totB)-6}" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--Bt)" font-family="var(--font)">${totB}</text>
+        <text x="130" y="124" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--font)">B</text>
+      </g>
+      <g>
+        <rect x="174" y="${110-barH(totC)}" width="46" height="${barH(totC)}" fill="var(--C2)" rx="2"/>
+        <text x="197" y="${110-barH(totC)-6}" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--Ct)" font-family="var(--font)">${totC}</text>
+        <text x="197" y="124" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--font)">C</text>
+      </g>
+    </svg>
+  </div>`;
+
+  /* Analyse observables */
+  let obsAnalysis="<h4 style='margin:12px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)'>Analyse par observable</h4>";
+  OBS.forEach((o,i)=>{
+    const mO=(eleves.reduce((s,e)=>s+e.scores[i],0)/n).toFixed(1);
+    const pO=profil(parseFloat(mO));
+    const statut=pO==="A"?"Lacune collective — SA prioritaire":pO==="B"?"En cours — consolider":"Bon niveau — approfondir";
+    obsAnalysis+=`<div class="obs-row">
+      <div class="obs-name">${o.label} — ${o.nom}</div>
+      <span class="obs-status s${pO}">${pO}</span>
+      <div style="font-size:10px;color:var(--muted)">${statut}</div>
+    </div>`;
+  });
+
+  /* Groupes */
+  let groupes="<h4 style='margin:12px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)'>Groupes de besoin</h4>";
+  ["A","B","C"].forEach(p=>{
+    const gl=eleves.filter(e=>e.profG===p);
+    if(gl.length>0){
+      groupes+=`<div class="alert info" style="margin-bottom:4px">
+        <strong>Groupe ${p} (${gl.length})</strong> — ${gl.map(e=>e.nom).join(", ")} — SA : ${SA[gl[0].saPrio]}
+      </div>`;
+    }
+  });
+
+  const decTxt=dom==="A"?"Classe débutante — Priorité fondamentaux (marque de passage + dissociation)":
+               dom==="B"?"Classe intermédiaire — Différenciation A/B active":
+               "Classe avancée — Approfondissement et tutorat";
+  const dec=`<div class="decision-box d${dom}"><strong>Décision automatique :</strong> ${decTxt}</div>`;
+
+  document.getElementById("step1-content").innerHTML = cards + repartChart + indicePanelHtml + obsAnalysis + groupes + dec + tbl;
+  filtreProfilActuel = "ALL";
+  filtrerTableau();
+  renderComparaison();
+}
+
+/* ================================================
+   ÉTAPE 2 — AXES
+================================================ */
+function renderAxes(){
+  const n=eleves.length;
+  const html=AXES.map(ax=>{
+    const obsIdx=OBS.findIndex(o=>o.id===ax.obs);
+    const pctLac=obsIdx>=0
+      ? Math.round(eleves.filter(e=>e.scores[obsIdx]<SEUILS.B).length/n*100)
+      : Math.round(Math.random()*40+20);
+    const prio=ax.id<=2?"▶ Recommandé":"Complémentaire";
+    return `<div class="axis-item" id="axis-item-${ax.id}">
+      <input type="checkbox" id="ax${ax.id}" onchange="toggleAxe(${ax.id},${pctLac})" ${selectedAxes.includes(ax.id)?"checked":""}>
+      <div style="flex:1">
+        <div class="axis-title">Axe ${ax.id} — ${ax.titre} <small style="font-weight:normal;color:var(--muted)">[${prio}]</small></div>
+        <div class="axis-meta">
+          Pertinence : <strong>${pctLac}%</strong> des élèves concernés · Observable : ${ax.obs} · SA : ${ax.sa}<br>
+          Lacune : ${ax.lacune} · Impact : ${ax.impact}
+        </div>
+        <div class="axis-bar"><div class="axis-bar-fill" style="width:${pctLac}%"></div></div>
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById("axes-list").innerHTML=html;
+  selectedAxes.forEach(id=>{
+    const item=document.getElementById("axis-item-"+id);
+    if(item) item.classList.add("selected");
+  });
+  const ok=selectedAxes.length>=3&&selectedAxes.length<=4;
+  document.getElementById("btnStep3").disabled=!ok;
+  document.getElementById("axes-alert").style.display=ok?"none":"block";
+}
+
+function toggleAxe(id,pct){
+  const cb=document.getElementById("ax"+id);
+  const item=document.getElementById("axis-item-"+id);
+  if(cb.checked){
+    if(selectedAxes.length>=4){cb.checked=false;showAxeAlert("Maximum 4 axes atteint.");return;}
+    selectedAxes.push(id); item.classList.add("selected");
+  } else {
+    selectedAxes=selectedAxes.filter(x=>x!==id); item.classList.remove("selected");
+  }
+  saveState();
+  const ok=selectedAxes.length>=3&&selectedAxes.length<=4;
+  document.getElementById("btnStep3").disabled=!ok;
+  document.getElementById("axes-alert").style.display=ok?"none":"block";
+}
+
+function showAxeAlert(msg){ const el=document.getElementById("axes-alert"); el.textContent=msg; el.style.display="block"; }
+
+/* ================================================
+   ÉTAPE 3 — SLIDER
+================================================ */
+function updateSlider(){
+  const v=parseInt(document.getElementById("sliderSeances").value);
+  nbSeances=v;
+  document.getElementById("sliderVal").textContent=v+" séance(s)";
+  const nA=selectedAxes.length>=4?4:3;
+  const dist=DISTRIB[nA.toString()][v];
+  const axObjs=selectedAxes.slice(0,nA).map(id=>AXES.find(a=>a.id===id));
+  let html=`<strong style="font-family:var(--font);font-size:11px">Cycle de ${v} séances — ${nA} séquences</strong><br><br>`;
+  dist.forEach((ns,i)=>{
+    const ax=axObjs[i];
+    html+=`<div class="distrib-seq">
+      <span class="seq-label">Séquence ${i+1}</span>
+      <span class="seq-block">${ns} séance(s)</span>
+      <span style="font-size:10px;color:var(--muted);margin-left:4px">${ax?ax.titre.substring(0,45)+"…":""}</span>
+    </div>`;
+  });
+  document.getElementById("distribPreview").innerHTML=html;
+  saveState();
+}
+
+/* ================================================
+   ÉTAPE 4 — PLANIFICATION
+================================================ */
+function genererPlanification(){
+  const nA=selectedAxes.length>=4?4:3;
+  const axObjs=selectedAxes.slice(0,nA).map(id=>AXES.find(a=>a.id===id));
+  const dist=DISTRIB[nA.toString()][nbSeances];
+  let html="";
+  let seanceGlobale=1;
+  dist.forEach((ns,seqIdx)=>{
+    const ax=axObjs[seqIdx];
+    const obj=seqIdx===0?"Fondamentaux — tous groupes":seqIdx===dist.length-1?"Consolidation B — approfondissement C":"Différenciation A/B/C active";
+    html+=`<div class="seq-section">
+      <div class="seq-head">Séquence ${seqIdx+1} — ${ax.titre.substring(0,50)}…</div>
+      <div class="seq-sub">Objectif général : ${obj} · ${ns} séance(s) · SA : ${SA[ax.sa]}</div>
+      <table class="plan-table"><thead><tr>
+        <th>Séance</th><th>Axe dominant</th><th>Objectif</th>
+        <th class="td-A">Groupe A — Débutants</th>
+        <th class="td-B">Groupe B — Intermédiaires</th>
+        <th class="td-C">Groupe C — Avancés</th>
+      </tr></thead><tbody>`;
+    for(let s=0;s<ns;s++){
+      const isLast=s===ns-1;
+      const isVeryLast=seqIdx===dist.length-1&&isLast;
+      const objSeance=isVeryLast?"Bilan de cycle — situation officielle":s===0?"Évaluation diagnostique de l'axe":"Consolidation — régulation collective";
+      html+=`<tr>
+        <td class="td-seq">S${seanceGlobale}</td>
+        <td style="font-size:9px;font-family:var(--font)">Axe ${ax.id}</td>
+        <td style="font-size:9px">${objSeance}</td>
+        <td class="td-A"><span class="sa-chip">${ax.sa}</span><div class="plan-consigne">${ax.consA}</div><div class="plan-critere">Critère : ${ax.critA}</div></td>
+        <td class="td-B"><span class="sa-chip">${ax.sa}</span><div class="plan-consigne">${ax.consB}</div><div class="plan-critere">Critère : ${ax.critB}</div></td>
+        <td class="td-C"><span class="sa-chip">${ax.sa}</span><div class="plan-consigne">${ax.consC}</div><div class="plan-critere">Critère : ${ax.critC}</div></td>
+      </tr>`;
+      if(!isLast){
+        html+=`<tr><td colspan="6"><div class="passage-indicator">
+          <span class="pi-label">📋 À observer avant la séance suivante :</span> ${ax.conduite}
+          <em style="display:block;margin-top:3px;color:#b8470f">(Indicatif — décision de progression : vous)</em>
+        </div></td></tr>`;
+      }
+      seanceGlobale++;
+    }
+    html+="</tbody></table></div>";
+  });
+
+  const dom=["A","B","C"].reduce((p,c)=>eleves.filter(e=>e.profG===c).length>eleves.filter(e=>e.profG===p).length?c:p,"A");
+  html+=`<div class="cycle-summary"><h3>Résumé du cycle</h3>
+    <table class="data-table"><thead><tr><th>Séquence</th><th>Axes travaillés</th><th>Séances</th><th>Profil ciblé</th></tr></thead><tbody>
+    ${dist.map((ns,i)=>`<tr><td>Séquence ${i+1}</td><td style="font-family:var(--font);font-size:9px">Axe ${axObjs[i].id} — ${axObjs[i].titre.substring(0,35)}…</td><td>${ns}</td><td>${i===0?"A dominant":i===dist.length-1?"C horizon":"B différenciation"}</td></tr>`).join("")}
+    </tbody></table>
+    <p style="margin-top:10px;font-size:11px">Cycle de <strong>${nbSeances} séances</strong> — <strong>${nA} axes prioritaires</strong>.<br>
+    Profil le plus concerné : <strong>${dom}</strong> (${eleves.filter(e=>e.profG===dom).length} équipe(s)).<br>
+    <em>Réévaluer après la séquence 2 avec une nouvelle collecte terrain.</em></p>
+  </div>`;
+
+  document.getElementById("step4-content").innerHTML=html;
+  saveState();
+  goStep(4);
+}
+
+/* ================================================
+   IMPORT CSV
+================================================ */
+function importCSV(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const raw=e.target.result;
+    const firstLine=raw.split(/\r?\n/)[0]||"";
+    const sep=firstLine.includes(";")?";":",";
+    const lines=raw.split(/\r?\n/).filter(l=>l.trim().length>0);
+    const nomPatterns=["nom","prenom","nom_eleve","eleve","apprenant","equipe"];
+    const chronoPatterns=["chrono","temps"];
+    const genrePatterns=["genre","sexe","g/f"];
+    const distancePatterns=["distance"];
+    let headerIdx=-1,headers=[];
+    for(let i=0;i<lines.length;i++){
+      const low=lines[i].toLowerCase();
+      if(nomPatterns.some(p=>low.includes(p))||chronoPatterns.some(p=>low.includes(p))){
+        headerIdx=i; headers=lines[i].split(sep).map(h=>h.trim().replace(/^["']|["']$/g,"")); break;
+      }
+    }
+    if(headerIdx<0){ showAlert("En-tête CSV non trouvée.","err"); return; }
+    const headerLow=headers.map(h=>h.toLowerCase());
+    let nomIdx=0;
+    for(let i=0;i<headerLow.length;i++){ if(nomPatterns.some(p=>headerLow[i].includes(p))){ nomIdx=i; break; } }
+    const qcIdx=headerLow.findIndex(h=>h.includes("obs01")||h.includes("qc"));
+
+    // OBS-03 QT : la Grille Terrain exporte 3 colonnes par charnière (Ch1_QT, Ch2_QT, Ch3_QT).
+    // On détecte toutes les colonnes correspondantes et on prend la valeur majoritaire.
+    function findAllCols(keyword){
+      const idxs=[];
+      for(let i=0;i<headerLow.length;i++){ if(headerLow[i].includes(keyword)) idxs.push(i); }
+      return idxs;
+    }
+    let qtCols=findAllCols("_qt");
+    if(qtCols.length===0) qtCols=findAllCols("qt").filter(i=>!headerLow[i].includes("obs"));
+    if(qtCols.length===0){ const qtIdx=headerLow.findIndex(h=>h.includes("obs03")||h.includes("qt")); if(qtIdx>=0) qtCols=[qtIdx]; }
+
+    function degToScore(d){ return d==="A"?1:d==="B"?2:d==="C"?3:0; }
+    function scoreToDeg(s){ return s>=2.5?"C":s>=1.5?"B":"A"; }
+    function majoriteDeg(parts, cols){
+      const vals=cols.map(idx=>{
+        if(idx<0||idx>=parts.length) return "";
+        const val=parts[idx].toUpperCase().trim();
+        if(["A","B","C"].includes(val)) return val;
+        const codeMap={"QC-":"A","QC~":"B","QC+":"C","QT-":"A","QT~":"B","QT+":"C"};
+        if(codeMap[val]) return codeMap[val];
+        return "";
+      }).filter(v=>v!=="");
+      if(vals.length===0) return "";
+      const moy=vals.reduce((s,v)=>s+degToScore(v),0)/vals.length;
+      return scoreToDeg(moy);
+    }
+
+    // Chrono collectif + genre + distance : exclure les colonnes RX_Chrono (relayeurs individuels)
+    let chronoIdx=-1, genreIdx=-1, distanceIdx=-1;
+    for(let i=0;i<headerLow.length;i++){
+      const isRelayeurChronoCol=/^r[1-4]_chrono$/.test(headerLow[i]);
+      if(chronoIdx<0 && !isRelayeurChronoCol && chronoPatterns.some(p=>headerLow[i].includes(p))) chronoIdx=i;
+      if(genreIdx<0 && genrePatterns.some(p=>headerLow[i].includes(p))) genreIdx=i;
+      if(distanceIdx<0 && distancePatterns.some(p=>headerLow[i].includes(p))) distanceIdx=i;
+    }
+
+    // Colonnes des chronos individuels par relayeur (export Grille Terrain : R1..R4 = noms,
+    // R1_Chrono..R4_Chrono = chronos individuels sur la distance unitaire)
+    const relayeurNomIdx=[1,2,3,4].map(n=>headerLow.findIndex(h=>h===("r"+n)));
+    const relayeurChronoIdx=[1,2,3,4].map(n=>headerLow.findIndex(h=>h.includes("r"+n+"_chrono")));
+
+    // Si le CSV indique une distance (export Grille Terrain), synchroniser le bareme de l'outil
+    if(distanceIdx>=0){
+      for(let i=headerIdx+1;i<lines.length;i++){
+        const parts=lines[i].split(sep);
+        if(parts.length>distanceIdx){
+          const dVal=parseInt(parts[distanceIdx].trim(),10);
+          if(!isNaN(dVal) && [30,40,50,60,80].includes(dVal)){
+            if(typeof DISTANCE_OUTIL!=="undefined" && dVal!==DISTANCE_OUTIL){
+              DISTANCE_OUTIL=dVal;
+              if(typeof calculerSeuilsOutil==="function") CHRONO_SEUILS=calculerSeuilsOutil(DISTANCE_OUTIL);
+              const distSel=document.getElementById("distanceSelectOutil");
+              if(distSel) distSel.value=String(DISTANCE_OUTIL);
+              if(typeof updateBaremePreview==="function") updateBaremePreview();
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    let imported=0,ignored=0;
+    for(let i=headerIdx+1;i<lines.length;i++){
+      const parts=lines[i].split(sep).map(p=>p.trim().replace(/^["']|["']$/g,""));
+      if(parts.length<2){ignored++;continue;}
+      const nom=(parts[nomIdx]||"").trim();
+      if(!nom){ignored++;continue;}
+      const codeMap={"QC-":"A","QC~":"B","QC+":"C","QT-":"A","QT~":"B","QT+":"C"};
+      let d1=qcIdx>=0?parts[qcIdx]?.toUpperCase()?.trim():"";
+      d1=["A","B","C"].includes(d1)?d1:(codeMap[d1]||"");
+      const d3=majoriteDeg(parts, qtCols);
+      const chrono=chronoIdx>=0?parts[chronoIdx]?.trim():"";
+      const gv=genreIdx>=0?parts[genreIdx]?.trim()?.toUpperCase():"";
+      const genre=gv?.startsWith("F")?"F":gv?.startsWith("G")?"G":"";
+
+      const relayeurs=[0,1,2,3].map(idx=>{
+        const nomI=relayeurNomIdx[idx];
+        const chronoI=relayeurChronoIdx[idx];
+        return {
+          nom:(nomI>=0 && nomI<parts.length)?parts[nomI].trim():"",
+          chrono:(chronoI>=0 && chronoI<parts.length)?parts[chronoI].trim():""
+        };
+      });
+
+      addRow({nom,d1,d3,chrono,genre,relayeurs});
+      imported++;
+    }
+    showAlert(`${imported} ligne(s) importée(s). ${ignored} ignorée(s).`,imported>0?"info":"warn");
+    saveState();
+  };
+  reader.readAsText(file,"UTF-8");
+  input.value="";
+}
+
+/* ================================================
+   EXPORT CSV
+================================================ */
+function exportCSV(){
+  if(eleves.length===0){alert("Analysez d'abord la classe.");return;}
+  const bom="\uFEFF";
+  const headers=["Prénom",...OBS.map(o=>o.label),"Chrono Collectif","Σ Chronos Indiv","Indice Relais","Rang","Profil","SA"];
+  const rows=eleves.map(e=>[
+    e.nom,
+    ...e.degs.map((d,i)=>OBS[i].codes[d]),
+    e.chrono||"",
+    e.relayeurs.filter(r=>r.chrono).reduce((s,r)=>s+(r.chrono||0),0).toFixed(2)||"",
+    e.indiceRelais!==null?(e.indiceRelais>=0?"+":"")+e.indiceRelais.toFixed(2):"",
+    e.rang, e.profG, e.saPrio
+  ]);
+  const csv=bom+[headers,...rows].map(r=>r.map(v=>`"${v}"`).join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+  a.download=`outil_v4_CR_${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+}
+
+/* ================================================
+   EXPORT / IMPORT SESSION
+================================================ */
+function exportSession(){
+  const state={eleves,selectedAxes,nbSeances,rowCount,version:VERSION,exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=`session_eps_cr_v4_${new Date().toISOString().split("T")[0]}.json`; a.click();
+  URL.revokeObjectURL(url); updateSessionStatus("Session exportée");
+}
+
+function importSession(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const state=JSON.parse(e.target.result);
+      if(!state.version||!state.eleves){showAlert("Fichier de session invalide","err");return;}
+      if(!confirm("Cela remplacera les données actuelles. Continuer ?")) return;
+      eleves=state.eleves||[]; selectedAxes=state.selectedAxes||[];
+      nbSeances=state.nbSeances||6; rowCount=state.rowCount||0;
+      saveState();
+      document.getElementById("rowsContainer").innerHTML="";
+      if(eleves.length>0){
+        eleves.forEach(e=>addRow({nom:e.nom,d1:e.degs[0],d3:e.degs[2],chrono:e.chrono,genre:e.genre,relayeurs:e.relayeurs||[]}));
+      } else { addRow(); addRow(); addRow(); }
+      showAlert("Session restaurée avec succès","success");
+      updateSessionStatus("Session importée"); goStep(0);
+    }catch(err){ showAlert("Erreur lors de l'import: "+err.message,"err"); }
+  };
+  reader.readAsText(file,"UTF-8"); input.value="";
+}
+
+/* ================================================
+   COMPARAISON ENTRE DEUX SÉANCES (progression)
+   ================================================ */
+function chargerComparaison(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const state = JSON.parse(e.target.result);
+      if(!state.eleves || !Array.isArray(state.eleves)){
+        showAlert("Fichier de séance de référence invalide.", "err");
+        return;
+      }
+      comparaisonRef = {
+        eleves: state.eleves,
+        date: state.exportedAt ? new Date(state.exportedAt).toLocaleDateString("fr-FR") : "date inconnue"
+      };
+      document.getElementById("btnClearCompare").style.display = "inline-block";
+      showAlert(`Séance de référence chargée (${comparaisonRef.eleves.length} équipe(s), exportée le ${comparaisonRef.date}).`, "info");
+      if(eleves.length > 0) renderComparaison();
+    } catch(err) {
+      showAlert("Erreur de lecture du fichier de référence : " + err.message, "err");
+    }
+  };
+  reader.readAsText(file, "UTF-8");
+  input.value = "";
+}
+
+function effacerComparaison(){
+  comparaisonRef = null;
+  document.getElementById("btnClearCompare").style.display = "none";
+  document.getElementById("compareResult").innerHTML = "";
+}
+
+function renderComparaison(){
+  const resultEl = document.getElementById("compareResult");
+  if(!resultEl) return;
+  if(!comparaisonRef || eleves.length === 0){
+    resultEl.innerHTML = "";
+    return;
+  }
+
+  const refEleves = comparaisonRef.eleves;
+  const profCount = (list) => ({
+    A: list.filter(e=>e.profG==="A").length,
+    B: list.filter(e=>e.profG==="B").length,
+    C: list.filter(e=>e.profG==="C").length
+  });
+  const refProf = profCount(refEleves);
+  const curProf = profCount(eleves);
+
+  const refIndices = refEleves.map(e=>e.indiceRelais).filter(v=>v!==null&&v!==undefined);
+  const curIndices = eleves.map(e=>e.indiceRelais).filter(v=>v!==null&&v!==undefined);
+  const refMoyIndice = refIndices.length ? (refIndices.reduce((s,v)=>s+v,0)/refIndices.length) : null;
+  const curMoyIndice = curIndices.length ? (curIndices.reduce((s,v)=>s+v,0)/curIndices.length) : null;
+
+  function deltaHtml(curVal, refVal, unit, inverse){
+    if(curVal===null || refVal===null) return '<span class="compare-delta-flat">—</span>';
+    const diff = curVal - refVal;
+    const better = inverse ? diff < 0 : diff > 0;
+    const flat = Math.abs(diff) < 0.01;
+    const cls = flat ? "compare-delta-flat" : better ? "compare-delta-up" : "compare-delta-down";
+    const arrow = flat ? "≈" : diff > 0 ? "↑" : "↓";
+    return `<span class="${cls}">${arrow} ${diff>=0?"+":""}${diff.toFixed(2)}${unit}</span>`;
+  }
+
+  resultEl.innerHTML = `
+    <table class="compare-table">
+      <thead><tr><th>Indicateur</th><th>Référence (${comparaisonRef.date})</th><th>Séance actuelle</th><th>Évolution</th></tr></thead>
+      <tbody>
+        <tr><td class="left" style="text-align:left">Profil A (débutants)</td><td>${refProf.A}</td><td>${curProf.A}</td><td>${deltaHtml(curProf.A, refProf.A, "", true)}</td></tr>
+        <tr><td class="left" style="text-align:left">Profil B (intermédiaires)</td><td>${refProf.B}</td><td>${curProf.B}</td><td>${deltaHtml(curProf.B, refProf.B, "", false)}</td></tr>
+        <tr><td class="left" style="text-align:left">Profil C (avancés)</td><td>${refProf.C}</td><td>${curProf.C}</td><td>${deltaHtml(curProf.C, refProf.C, "", false)}</td></tr>
+        <tr><td class="left" style="text-align:left">Indice de Relais moyen</td><td>${refMoyIndice!==null?refMoyIndice.toFixed(2)+'"':"—"}</td><td>${curMoyIndice!==null?curMoyIndice.toFixed(2)+'"':"—"}</td><td>${deltaHtml(curMoyIndice, refMoyIndice, '"', false)}</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:9px;color:var(--muted);margin-top:6px;font-family:var(--font)">
+      Profil A en baisse et Profils B/C en hausse = progression positive de la classe. Indice de Relais en hausse = transmissions plus efficaces.
+    </p>`;
+}
+
+function clearAllData(){
+  if(!confirm("ATTENTION : Effacer TOUTES les données ? Cette opération est irréversible.")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  document.getElementById("rowsContainer").innerHTML="";
+  eleves=[]; selectedAxes=[]; rowCount=0; nbSeances=6;
+  clearAlert(); addRow(); addRow(); addRow();
+  updateSessionStatus("Session réinitialisée"); showAlert("Nouvelle session prête","success");
+}
+
+function resetAll(){ clearAllData(); }
+
+/* ================================================
+   GRILLE DI TERRAIN — embarquée en base64
+================================================ */
+var GRILLE_DI_B64 = 'PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImZyIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9IlVURi04Ij4KPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xLjAiPgo8dGl0bGU+R3JpbGxlIFRlcnJhaW4g4oCUIENvdXJzZSBkZSBSZWxhaXMgQ1Ig4oCUIDggw4lxdWlwZXMg4oCUIEFEUDIwMjY8L3RpdGxlPgo8c3R5bGU+CiAgOnJvb3QgewogICAgLS1hOiAjRkNFQkVCOyAtLWEtYm9yZGVyOiAjZDk1MzRmOyAtLWEtdGV4dDogIzhiMWExYTsKICAgIC0tYjogI0ZBRUVEQTsgLS1iLWJvcmRlcjogI2U2YTgxNzsgLS1iLXRleHQ6ICM3YTRmMDA7CiAgICAtLWM6ICNFQUYzREU7IC0tYy1ib3JkZXI6ICM1YTllM2E7IC0tYy10ZXh0OiAjMWE1ZTBhOwogICAgLS1pbms6ICMxMDE4MjA7IC0tcnVsZTogI2MyY2FkMzsKICAgIC0taGVhZGVyLWJnOiAjMGIyMDM4OyAtLWhlYWRlci1iZzI6ICMwZDI4NDc7IC0taGVhZGVyLXRleHQ6ICNmZWY5ZjM7CiAgICAtLWFjY2VudDogI2ZmNmIzNTsgLS1hY2NlbnQtZGFyazogI2Q5NTAxZjsKICAgIC0tYmxvY2stYmc6ICNmZmY7IC0tYmxvY2stYm9yZGVyOiAjMmMzZTUwOwogICAgLS1zdHJpcGU6ICNmN2Y4ZmE7CiAgICAtLWZvbnQtbWFpbjogJ0NvdXJpZXIgUHJpbWUnLCdDb3VyaWVyIE5ldycsbW9ub3NwYWNlOwogICAgLS1mb250LXVpOiAtYXBwbGUtc3lzdGVtLCdTZWdvZSBVSScsUm9ib3RvLHN5c3RlbS11aSxzYW5zLXNlcmlmOwogIH0KICAqLCo6OmJlZm9yZSwqOjphZnRlcntib3gtc2l6aW5nOmJvcmRlci1ib3g7bWFyZ2luOjA7cGFkZGluZzowO30KICBib2R5e2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtbWFpbik7Zm9udC1zaXplOjEwcHg7Y29sb3I6dmFyKC0taW5rKTtiYWNrZ3JvdW5kOiNkZGUyZTg7cGFkZGluZzo1bW07fQoKICAubWFzdGVyLWhlYWRlcntiYWNrZ3JvdW5kOmxpbmVhci1ncmFkaWVudCgxMzVkZWcsdmFyKC0taGVhZGVyLWJnKSx2YXIoLS1oZWFkZXItYmcyKSk7Y29sb3I6dmFyKC0taGVhZGVyLXRleHQpO3BhZGRpbmc6N3B4IDEycHg7ZGlzcGxheTpmbGV4O2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO2FsaWduLWl0ZW1zOmNlbnRlcjttYXJnaW4tYm90dG9tOjZweDtib3JkZXItcmFkaXVzOjRweDtib3JkZXItYm90dG9tOjNweCBzb2xpZCB2YXIoLS1hY2NlbnQpO30KICAubWFzdGVyLWhlYWRlciAudGl0bGV7Zm9udC1zaXplOjEzLjVweDtmb250LXdlaWdodDpib2xkO2xldHRlci1zcGFjaW5nOi4wNmVtO3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTt9CiAgLm1hc3Rlci1oZWFkZXIgLm1ldGF7b3BhY2l0eTouNzI7Zm9udC1zaXplOjhweDttYXJnaW4tdG9wOjJweDt9CiAgLmJhZGdlLWRpe2JhY2tncm91bmQ6bGluZWFyLWdyYWRpZW50KDEzNWRlZywjZmY4YzVhLHZhcigtLWFjY2VudCkpO2NvbG9yOiMzYTE1MDU7cGFkZGluZzo0cHggMTFweDtmb250LXdlaWdodDpib2xkO2ZvbnQtc2l6ZTo5cHg7Ym9yZGVyLXJhZGl1czoxNHB4O2xldHRlci1zcGFjaW5nOi4wNWVtO30KCiAgLmZvdXJjaGV0dGUtYmFye2Rpc3BsYXk6ZmxleDtnYXA6NXB4O2FsaWduLWl0ZW1zOmNlbnRlcjtmbGV4LXdyYXA6d3JhcDtiYWNrZ3JvdW5kOiNmZmY7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1ydWxlKTtwYWRkaW5nOjVweCAxMHB4O21hcmdpbi1ib3R0b206NnB4O2JvcmRlci1yYWRpdXM6NHB4O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtdWkpO2ZvbnQtc2l6ZTo4LjVweDt9CiAgLmZvdXJjaGV0dGUtYmFyIC5mYi10aXRsZXtmb250LXdlaWdodDpib2xkO2NvbG9yOnZhcigtLWluayk7Zm9udC1zaXplOjlweDtsZXR0ZXItc3BhY2luZzouMDRlbTttYXJnaW4tcmlnaHQ6M3B4O30KICAuZmItY2hpcHtkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtwYWRkaW5nOjJweCA4cHg7Ym9yZGVyLXJhZGl1czoxMHB4O2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjhweDt9CiAgLmZiLWNoaXAuYXtiYWNrZ3JvdW5kOnZhcigtLWEpO2NvbG9yOnZhcigtLWEtdGV4dCk7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1hLWJvcmRlcik7fQogIC5mYi1jaGlwLmJ7YmFja2dyb3VuZDp2YXIoLS1iKTtjb2xvcjp2YXIoLS1iLXRleHQpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYi1ib3JkZXIpO30KICAuZmItY2hpcC5je2JhY2tncm91bmQ6dmFyKC0tYyk7Y29sb3I6dmFyKC0tYy10ZXh0KTtib3JkZXI6MXB4IHNvbGlkIHZhcigtLWMtYm9yZGVyKTt9CiAgLmZiLXNlcHtjb2xvcjojY2NjO21hcmdpbjowIDNweDt9CiAgLmZiLW5vdGV7Zm9udC1zaXplOjcuNXB4O2NvbG9yOiM4ODg7bWFyZ2luLWxlZnQ6YXV0bztmb250LXN0eWxlOml0YWxpYzt9CiAgLmRpc3RhbmNlLXNlbGVjdC13cmFwe2Rpc3BsYXk6aW5saW5lLWZsZXg7fQogIC5kaXN0YW5jZS1zZWxlY3R7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7Zm9udC1zaXplOjlweDtmb250LXdlaWdodDpib2xkO3BhZGRpbmc6MnB4IDRweDtib3JkZXI6MS41cHggc29saWQgIzMzMztib3JkZXItcmFkaXVzOjJweDtiYWNrZ3JvdW5kOiNmZmY7Y29sb3I6IzExMTtjdXJzb3I6cG9pbnRlcjt9CgogIC5sZWdlbmQtYmFye2Rpc3BsYXk6ZmxleDtnYXA6NnB4O2FsaWduLWl0ZW1zOmNlbnRlcjtmb250LXNpemU6OXB4O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtdWkpO2ZsZXgtd3JhcDp3cmFwO21hcmdpbi1ib3R0b206NXB4O30KICAubGVnLWxhYmVse2ZvbnQtd2VpZ2h0OmJvbGQ7Y29sb3I6IzU1NTt9CiAgLmxlZy1jaGlwe2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO3BhZGRpbmc6MnB4IDZweDtib3JkZXItcmFkaXVzOjJweDtmb250LXdlaWdodDpib2xkO2ZvbnQtc2l6ZTo4LjVweDt9CiAgLmxlZy1jaGlwLmF7YmFja2dyb3VuZDp2YXIoLS1hKTtjb2xvcjp2YXIoLS1hLXRleHQpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYS1ib3JkZXIpO30KICAubGVnLWNoaXAuYntiYWNrZ3JvdW5kOnZhcigtLWIpO2NvbG9yOnZhcigtLWItdGV4dCk7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1iLWJvcmRlcik7fQogIC5sZWctY2hpcC5je2JhY2tncm91bmQ6dmFyKC0tYyk7Y29sb3I6dmFyKC0tYy10ZXh0KTtib3JkZXI6MXB4IHNvbGlkIHZhcigtLWMtYm9yZGVyKTt9CiAgLnJ1bGUtbm90ZXtmb250LXNpemU6Ny41cHg7Y29sb3I6Izg4ODttYXJnaW4tbGVmdDphdXRvO30KCiAgLnBhZ2V7ZGlzcGxheTpncmlkO2dyaWQtdGVtcGxhdGUtY29sdW1uczpyZXBlYXQoNCwxZnIpO2dhcDo0cHg7bWFyZ2luLWJvdHRvbTo1cHg7fQogIC50ZWFtLWJsb2Nre2JhY2tncm91bmQ6dmFyKC0tYmxvY2stYmcpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYmxvY2stYm9yZGVyKTtib3JkZXItcmFkaXVzOjZweDtvdmVyZmxvdzpoaWRkZW47YnJlYWstaW5zaWRlOmF2b2lkO3BhZ2UtYnJlYWstaW5zaWRlOmF2b2lkO2JveC1zaGFkb3c6MCAxcHggM3B4IHJnYmEoMTEsMzIsNTYsLjEpO30KCiAgLnRlYW0taGVhZHtiYWNrZ3JvdW5kOmxpbmVhci1ncmFkaWVudCgxMzVkZWcsdmFyKC0taGVhZGVyLWJnKSx2YXIoLS1oZWFkZXItYmcyKSk7Y29sb3I6dmFyKC0taGVhZGVyLXRleHQpO2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47cGFkZGluZzo0cHggOHB4O2dhcDo0cHg7Ym9yZGVyLWJvdHRvbToycHggc29saWQgdmFyKC0tYWNjZW50KTt9CiAgLnRlYW0tbnVte2ZvbnQtc2l6ZToxNXB4O2ZvbnQtd2VpZ2h0OmJvbGQ7bWluLXdpZHRoOjM2cHg7fQogIC50ZWFtLW5hbWUtaW5wdXR7ZmxleDoxO2JhY2tncm91bmQ6cmdiYSgyNTUsMjU1LDI1NSwuMTIpO2JvcmRlcjpub25lO2JvcmRlci1ib3R0b206MXB4IHNvbGlkIHJnYmEoMjU1LDI1NSwyNTUsLjM1KTtjb2xvcjojZmZmO2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtbWFpbik7Zm9udC1zaXplOjlweDtwYWRkaW5nOjFweCAzcHg7b3V0bGluZTpub25lO2JvcmRlci1yYWRpdXM6MnB4IDJweCAwIDA7fQogIC50ZWFtLW5hbWUtaW5wdXQ6OnBsYWNlaG9sZGVye2NvbG9yOnJnYmEoMjU1LDI1NSwyNTUsLjQ1KTtmb250LXN0eWxlOml0YWxpYzt9CiAgLnRlYW0tZGF0ZXtmb250LXNpemU6OHB4O29wYWNpdHk6LjY1O3doaXRlLXNwYWNlOm5vd3JhcDt9CgogIC5zZWMtbGFiZWx7YmFja2dyb3VuZDp2YXIoLS1zdHJpcGUpO2JvcmRlci10b3A6MXB4IHNvbGlkIHZhcigtLXJ1bGUpO2JvcmRlci1ib3R0b206MXB4IHNvbGlkIHZhcigtLXJ1bGUpO2ZvbnQtc2l6ZTo3cHg7Zm9udC13ZWlnaHQ6Ym9sZDtsZXR0ZXItc3BhY2luZzouMDhlbTt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7Y29sb3I6dmFyKC0taGVhZGVyLWJnMik7cGFkZGluZzozcHggNnB4O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtdWkpO30KCiAgLmRlZy1ncm91cHtkaXNwbGF5OmZsZXg7Z2FwOjJweDtqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyO30KICAuZGVnLWJ0bntkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyO3dpZHRoOjE4cHg7aGVpZ2h0OjE4cHg7Ym9yZGVyLXJhZGl1czo1MCU7Ym9yZGVyOjEuNXB4IHNvbGlkICNjMmNhZDM7Zm9udC1zaXplOjlweDtmb250LXdlaWdodDpib2xkO2N1cnNvcjpwb2ludGVyO3RyYW5zaXRpb246YWxsIC4xMnM7dXNlci1zZWxlY3Q6bm9uZTtiYWNrZ3JvdW5kOiNmZmY7Y29sb3I6I2E4YjBiODtmb250LWZhbWlseTp2YXIoLS1mb250LXVpKTt9CiAgLmRlZy1idG46aG92ZXJ7Ym9yZGVyLWNvbG9yOiM3YTg4OTY7Y29sb3I6IzU1NTt9CiAgLmRlZy1idG4uc2VsLWF7YmFja2dyb3VuZDp2YXIoLS1hKTtib3JkZXItY29sb3I6dmFyKC0tYS1ib3JkZXIpO2NvbG9yOnZhcigtLWEtdGV4dCk7Ym9yZGVyLXdpZHRoOjJweDt9CiAgLmRlZy1idG4uc2VsLWJ7YmFja2dyb3VuZDp2YXIoLS1iKTtib3JkZXItY29sb3I6dmFyKC0tYi1ib3JkZXIpO2NvbG9yOnZhcigtLWItdGV4dCk7Ym9yZGVyLXdpZHRoOjJweDt9CiAgLmRlZy1idG4uc2VsLWN7YmFja2dyb3VuZDp2YXIoLS1jKTtib3JkZXItY29sb3I6dmFyKC0tYy1ib3JkZXIpO2NvbG9yOnZhcigtLWMtdGV4dCk7Ym9yZGVyLXdpZHRoOjJweDt9CgogIC5jb2xsZWN0aWYtcm93e2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7cGFkZGluZzozcHggNXB4O2dhcDo1cHg7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgI2VlZTtmb250LXNpemU6OHB4O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtdWkpO30KICAub2JzLWxhYmVse2ZvbnQtc2l6ZTo3cHg7Zm9udC13ZWlnaHQ6Ym9sZDtjb2xvcjojNDQ0O2xldHRlci1zcGFjaW5nOi4wNWVtO21pbi13aWR0aDo1MnB4O30KICAuaW5kaWNlLWJveHtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDozcHg7bWFyZ2luLWxlZnQ6YXV0bztmb250LXNpemU6N3B4O2NvbG9yOiM2NjY7fQogIC5pbmRpY2UtYm94IGlucHV0e3dpZHRoOjI4cHg7Ym9yZGVyOm5vbmU7Ym9yZGVyLWJvdHRvbToxLjVweCBzb2xpZCAjNTU1O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtbWFpbik7Zm9udC1zaXplOjlweDt0ZXh0LWFsaWduOmNlbnRlcjtiYWNrZ3JvdW5kOnRyYW5zcGFyZW50O291dGxpbmU6bm9uZTt9CgogIC5wZXJmLXNlY3Rpb257cGFkZGluZzozcHggNXB4O2JvcmRlci1ib3R0b206MXB4IHNvbGlkICNlZWU7fQogIC5wZXJmLXJvd3tkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo0cHg7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7fQogIC5wZXJmLWxhYmVse2ZvbnQtc2l6ZTo3cHg7Zm9udC13ZWlnaHQ6Ym9sZDtjb2xvcjojNDQ0O21pbi13aWR0aDo1MnB4O30KICAuY2hyb25vLWlucHV0e3dpZHRoOjM2cHg7Ym9yZGVyOm5vbmU7Ym9yZGVyLWJvdHRvbToycHggc29saWQgIzQ0NDtmb250LWZhbWlseTp2YXIoLS1mb250LW1haW4pO2ZvbnQtc2l6ZToxMXB4O2ZvbnQtd2VpZ2h0OmJvbGQ7dGV4dC1hbGlnbjpjZW50ZXI7YmFja2dyb3VuZDp0cmFuc3BhcmVudDtvdXRsaW5lOm5vbmU7cGFkZGluZzowIDFweDt9CiAgLmNocm9uby1pbnB1dDo6cGxhY2Vob2xkZXJ7Y29sb3I6I2JiYjtmb250LXNpemU6OC41cHg7Zm9udC13ZWlnaHQ6bm9ybWFsO30KICAuY2hyb25vLWZtdHtmb250LXNpemU6N3B4O2NvbG9yOiNiYmI7fQogIC5nZW5yZS10b2dnbGV7ZGlzcGxheTpmbGV4O2dhcDoycHg7fQogIC5nZW5yZS1idG57cGFkZGluZzoxcHggNXB4O2JvcmRlcjoxLjVweCBzb2xpZCAjYmJiO2JvcmRlci1yYWRpdXM6MnB4O2ZvbnQtc2l6ZTo4cHg7Zm9udC13ZWlnaHQ6Ym9sZDtjdXJzb3I6cG9pbnRlcjtiYWNrZ3JvdW5kOiNmZmY7Y29sb3I6Izk5OTtmb250LWZhbWlseTp2YXIoLS1mb250LXVpKTt0cmFuc2l0aW9uOmFsbCAuMXM7fQogIC5nZW5yZS1idG46aG92ZXJ7Ym9yZGVyLWNvbG9yOiM1NTU7Y29sb3I6IzMzMzt9CiAgLmdlbnJlLWJ0bi5hY3RpdmUtZ3tiYWNrZ3JvdW5kOiNkZGVlZmY7Ym9yZGVyLWNvbG9yOiMzMzY2YWE7Y29sb3I6IzAwMzM4ODt9CiAgLmdlbnJlLWJ0bi5hY3RpdmUtZntiYWNrZ3JvdW5kOiNmZmVlZmY7Ym9yZGVyLWNvbG9yOiM5OTMzOTk7Y29sb3I6IzY2MDA2Njt9CiAgLmxldmVsLWJhZGdle2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7bWluLXdpZHRoOjMwcHg7cGFkZGluZzoycHggNXB4O2JvcmRlci1yYWRpdXM6M3B4O2ZvbnQtc2l6ZToxMXB4O2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7Ym9yZGVyOjEuNXB4IHNvbGlkICNkZGQ7YmFja2dyb3VuZDojZjVmNWY1O2NvbG9yOiNiYmI7dHJhbnNpdGlvbjphbGwgLjJzO2xldHRlci1zcGFjaW5nOi4wNWVtO30KICAubGV2ZWwtYmFkZ2UubHZsLWF7YmFja2dyb3VuZDp2YXIoLS1hKTtib3JkZXItY29sb3I6dmFyKC0tYS1ib3JkZXIpO2NvbG9yOnZhcigtLWEtdGV4dCk7fQogIC5sZXZlbC1iYWRnZS5sdmwtYntiYWNrZ3JvdW5kOnZhcigtLWIpO2JvcmRlci1jb2xvcjp2YXIoLS1iLWJvcmRlcik7Y29sb3I6dmFyKC0tYi10ZXh0KTt9CiAgLmxldmVsLWJhZGdlLmx2bC1je2JhY2tncm91bmQ6dmFyKC0tYyk7Ym9yZGVyLWNvbG9yOnZhcigtLWMtYm9yZGVyKTtjb2xvcjp2YXIoLS1jLXRleHQpO30KCiAgLnJlbGF5ZXVycy1saXN0e3BhZGRpbmc6MnB4IDVweDt9CiAgLnItcm93e2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjRweDtwYWRkaW5nOjJweCAwO2JvcmRlci1ib3R0b206MXB4IHNvbGlkICNmMmYyZjI7fQogIC5yLXJvdzpsYXN0LWNoaWxke2JvcmRlci1ib3R0b206bm9uZTt9CiAgLnItbnVte2ZvbnQtc2l6ZTo4cHg7Zm9udC13ZWlnaHQ6Ym9sZDtjb2xvcjojYWFhO21pbi13aWR0aDoxNHB4O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtdWkpO30KICAuci1jaHJvbm97d2lkdGg6MjZweDtib3JkZXI6bm9uZTtib3JkZXItYm90dG9tOjFweCBkYXNoZWQgI2NjYztmb250LWZhbWlseTp2YXIoLS1mb250LW1haW4pO2ZvbnQtc2l6ZTo4LjVweDtiYWNrZ3JvdW5kOnRyYW5zcGFyZW50O291dGxpbmU6bm9uZTtwYWRkaW5nOjA7dGV4dC1hbGlnbjpjZW50ZXI7Y29sb3I6IzBiMjAzODtmb250LXdlaWdodDpib2xkO2ZsZXgtc2hyaW5rOjA7fQogIC5yLWNocm9ubzo6cGxhY2Vob2xkZXJ7Y29sb3I6I2RkZDtmb250LXN0eWxlOml0YWxpYztmb250LXdlaWdodDpub3JtYWw7fQogIC5yLW5hbWV7ZmxleDoxO2JvcmRlcjpub25lO2JvcmRlci1ib3R0b206MXB4IGRhc2hlZCAjY2NjO2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtbWFpbik7Zm9udC1zaXplOjguNXB4O2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7b3V0bGluZTpub25lO3BhZGRpbmc6MDt9CiAgLnItbmFtZTo6cGxhY2Vob2xkZXJ7Y29sb3I6I2NjYztmb250LXN0eWxlOml0YWxpYzt9CgogIC5jaGFybmllcmUtcm93e2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7cGFkZGluZzoycHggNXB4O2dhcDozcHg7Zm9udC1zaXplOjhweDtmb250LWZhbWlseTp2YXIoLS1mb250LXVpKTtib3JkZXItYm90dG9tOjFweCBzb2xpZCAjZWVlO30KICAuY2hhcm5pZXJlLXJvdzpsYXN0LWNoaWxke2JvcmRlci1ib3R0b206bm9uZTt9CiAgLmNoLWxhYmVse2ZvbnQtc2l6ZTo3cHg7Y29sb3I6IzY2NjttaW4td2lkdGg6NTBweDtsZXR0ZXItc3BhY2luZzouMDJlbTt9CiAgLm9icy10YWd7Zm9udC1zaXplOjdweDtjb2xvcjojYWFhO21pbi13aWR0aDoxOHB4O2ZvbnQtZmFtaWx5OnZhcigtLWZvbnQtbWFpbik7fQoKICAucHJvZmlsLWZvb3RlcntiYWNrZ3JvdW5kOiNmOWY5Zjk7Ym9yZGVyLXRvcDoxLjVweCBzb2xpZCB2YXIoLS1ydWxlKTtwYWRkaW5nOjNweCA1cHg7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6NXB4O2ZvbnQtc2l6ZTo4cHg7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7fQogIC5wZi1sYWJlbHtmb250LXdlaWdodDpib2xkO2NvbG9yOiM0NDQ7Zm9udC1zaXplOjcuNXB4O3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTt9CiAgLm9icy1maWVsZHtmbGV4OjE7Ym9yZGVyOm5vbmU7Ym9yZGVyLWJvdHRvbToxcHggZGFzaGVkICNiYmI7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC1tYWluKTtmb250LXNpemU6OHB4O2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7b3V0bGluZTpub25lO30KCiAgLnNjcmVlbi1jb250cm9sc3tkaXNwbGF5OmZsZXg7Z2FwOjhweDttYXJnaW4tYm90dG9tOjhweDtmb250LWZhbWlseTp2YXIoLS1mb250LXVpKTtmbGV4LXdyYXA6d3JhcDthbGlnbi1pdGVtczpjZW50ZXI7fQogIC5idG57cGFkZGluZzo2cHggMTRweDtib3JkZXI6MS41cHggc29saWQgdmFyKC0taW5rKTtiYWNrZ3JvdW5kOiNmZmY7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7Zm9udC1zaXplOjEwcHg7Zm9udC13ZWlnaHQ6NzAwO2N1cnNvcjpwb2ludGVyO2xldHRlci1zcGFjaW5nOi4wMmVtO3RyYW5zaXRpb246YWxsIC4xNXM7Ym9yZGVyLXJhZGl1czoxNnB4O30KICAuYnRuOmhvdmVye2JhY2tncm91bmQ6dmFyKC0taW5rKTtjb2xvcjojZmZmO30KICAuYnRuLnByaW1hcnl7YmFja2dyb3VuZDpsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLHZhcigtLWhlYWRlci1iZzIpLHZhcigtLWhlYWRlci1iZykpO2NvbG9yOiNmZmY7Ym9yZGVyLWNvbG9yOnZhcigtLWhlYWRlci1iZyk7fQogIC5idG4ucHJpbWFyeTpob3ZlcntiYWNrZ3JvdW5kOmxpbmVhci1ncmFkaWVudCgxMzVkZWcsIzEyM2E1ZSx2YXIoLS1oZWFkZXItYmcyKSk7fQogIC5idG4tcmVzZXR7Ym9yZGVyLWNvbG9yOiNkOTUzNGY7Y29sb3I6I2Q5NTM0Zjt9CiAgLmJ0bi1yZXNldDpob3ZlcntiYWNrZ3JvdW5kOiNkOTUzNGY7Y29sb3I6I2ZmZjt9CiAgLmJ0bi1leHBvcnR7Ym9yZGVyLWNvbG9yOiM1YTllM2E7Y29sb3I6IzFhNWUwYTt9CiAgLmJ0bi1leHBvcnQ6aG92ZXJ7YmFja2dyb3VuZDojNWE5ZTNhO2NvbG9yOiNmZmY7fQogIC5wYWdlLWJyZWFre3BhZ2UtYnJlYWstYmVmb3JlOmFsd2F5czticmVhay1iZWZvcmU6YWx3YXlzO21hcmdpbi10b3A6OHB4O30KCiAgQG1lZGlhIHByaW50ewogICAgQHBhZ2V7c2l6ZTpBNCBsYW5kc2NhcGU7bWFyZ2luOjVtbTt9CiAgICBib2R5e2JhY2tncm91bmQ6I2ZmZjtwYWRkaW5nOjA7fQogICAgLnNjcmVlbi1jb250cm9sc3tkaXNwbGF5Om5vbmUhaW1wb3J0YW50O30KICAgIC5wYWdle2dhcDozbW07bWFyZ2luLWJvdHRvbTozbW07fQogICAgLnRlYW0tYmxvY2t7Ym9yZGVyOjFweCBzb2xpZCAjNjY2O30KICAgICp7LXdlYmtpdC1wcmludC1jb2xvci1hZGp1c3Q6ZXhhY3Q7cHJpbnQtY29sb3ItYWRqdXN0OmV4YWN0O30KICAgIC5wYWdlLWJyZWFre21hcmdpbi10b3A6MDt9CiAgfQo8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PgoKPGRpdiBjbGFzcz0ibWFzdGVyLWhlYWRlciI+CiAgPGRpdj4KICAgIDxkaXYgY2xhc3M9InRpdGxlIj5HcmlsbGUgVGVycmFpbiDCtyBDb3Vyc2UgZGUgUmVsYWlzIMK3IENSPC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJtZXRhIj5BRFAgMjAyNiDCtyBDUk1FRiBJbmV6Z2FuZSDCtyBCT1VBUkdBTkUgwrcgREkg4oCUIERpYWdub3N0aXF1ZSBJbml0aWFsIMK3IDYgc8OpYW5jZXMgwrcgUGFzIGRlIG5vdGUgLzIwPC9kaXY+CiAgPC9kaXY+CiAgPGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2dhcDo4cHg7YWxpZ24taXRlbXM6Y2VudGVyOyI+CiAgICA8ZGl2IHN0eWxlPSJ0ZXh0LWFsaWduOnJpZ2h0O2ZvbnQtc2l6ZTo4cHg7b3BhY2l0eTouNjsiPgogICAgICA8ZGl2PkRhdGUgOiBfX19fX19fX19fX19fX188L2Rpdj4KICAgICAgPGRpdj5PYnNlcnZhdGV1ciA6IF9fX19fX19fX19fX19fXzwvZGl2PgogICAgPC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJiYWRnZS1kaSIgaWQ9ImJhZGdlRGlzdGFuY2UiPkRJIMK3IDggw4lRVUlQRVMgwrcgNMOXNTBtPC9kaXY+CiAgPC9kaXY+CjwvZGl2PgoKPCEtLSBGT1VSQ0hFVFRFIFLDiUbDiVJFTkNFIC0tPgo8ZGl2IGNsYXNzPSJmb3VyY2hldHRlLWJhciI+CiAgPHNwYW4gY2xhc3M9ImZiLXRpdGxlIj7ij7EgRk9VUkNIRVRURTwvc3Bhbj4KICA8c3BhbiBjbGFzcz0iZGlzdGFuY2Utc2VsZWN0LXdyYXAiPgogICAgPHNlbGVjdCBpZD0iZGlzdGFuY2VTZWxlY3QiIGNsYXNzPSJkaXN0YW5jZS1zZWxlY3QiIG9uY2hhbmdlPSJvbkRpc3RhbmNlQ2hhbmdlKCkiPgogICAgICA8b3B0aW9uIHZhbHVlPSIzMCI+NMOXMzAgbTwvb3B0aW9uPgogICAgICA8b3B0aW9uIHZhbHVlPSI0MCI+NMOXNDAgbTwvb3B0aW9uPgogICAgICA8b3B0aW9uIHZhbHVlPSI1MCIgc2VsZWN0ZWQ+NMOXNTAgbTwvb3B0aW9uPgogICAgICA8b3B0aW9uIHZhbHVlPSI2MCI+NMOXNjAgbTwvb3B0aW9uPgogICAgICA8b3B0aW9uIHZhbHVlPSI4MCI+NMOXODAgbTwvb3B0aW9uPgogICAgPC9zZWxlY3Q+CiAgPC9zcGFuPgogIDxzcGFuIHN0eWxlPSJmb250LXNpemU6OHB4O2ZvbnQtd2VpZ2h0OmJvbGQ7Y29sb3I6IzMzNjZhYTsiPkdBUsOHT05TPC9zcGFuPgogIDxzcGFuIGNsYXNzPSJmYi1jaGlwIGMiIGlkPSJmYkctYyI+QyAmbmJzcDviiaQgMjgiNTwvc3Bhbj4KICA8c3BhbiBjbGFzcz0iZmItY2hpcCBiIiBpZD0iZmJHLWIiPkIgJm5ic3A7MjgiNiDigJMgMzYiMDwvc3Bhbj4KICA8c3BhbiBjbGFzcz0iZmItY2hpcCBhIiBpZD0iZmJHLWEiPkEgJm5ic3A7Jmd0OyAzNiIwPC9zcGFuPgogIDxzcGFuIGNsYXNzPSJmYi1zZXAiPuKUgjwvc3Bhbj4KICA8c3BhbiBzdHlsZT0iZm9udC1zaXplOjhweDtmb250LXdlaWdodDpib2xkO2NvbG9yOiM5OTMzOTk7Ij5GSUxMRVM8L3NwYW4+CiAgPHNwYW4gY2xhc3M9ImZiLWNoaXAgYyIgaWQ9ImZiRi1jIj5DICZuYnNwO+KJpCAzMyIwPC9zcGFuPgogIDxzcGFuIGNsYXNzPSJmYi1jaGlwIGIiIGlkPSJmYkYtYiI+QiAmbmJzcDszMyIxIOKAkyA0MiIwPC9zcGFuPgogIDxzcGFuIGNsYXNzPSJmYi1jaGlwIGEiIGlkPSJmYkYtYSI+QSAmbmJzcDsmZ3Q7IDQyIjA8L3NwYW4+CiAgPHNwYW4gY2xhc3M9ImZiLW5vdGUiPlRhcGV6IGxlIGNocm9ubyArIGdlbnJlIOKGkiBuaXZlYXUgcydhZmZpY2hlIHNldWw8L3NwYW4+CjwvZGl2PgoKPGRpdiBjbGFzcz0ibGVnZW5kLWJhciI+CiAgPHNwYW4gY2xhc3M9ImxlZy1sYWJlbCI+REVHUsOJUyDihpI8L3NwYW4+CiAgPHNwYW4gY2xhc3M9ImxlZy1jaGlwIGEiPkEg4oCUIETDqWJ1dGFudDwvc3Bhbj4KICA8c3BhbiBjbGFzcz0ibGVnLWNoaXAgYiI+QiDigJQgRW4gY29uc3RydWN0aW9uPC9zcGFuPgogIDxzcGFuIGNsYXNzPSJsZWctY2hpcCBjIj5DIOKAlCBNYcOudHJpc8OpPC9zcGFuPgogIDxzcGFuIHN0eWxlPSJjb2xvcjojY2NjOyI+4pSCPC9zcGFuPgogIDxzcGFuIHN0eWxlPSJmb250LXNpemU6OHB4O2NvbG9yOiM1NTU7Ij5PQlMtMDEgUUMgwrcgQ29sbGVjdGlmICZuYnNwO8K3Jm5ic3A7IE9CUy0wMiDCtyBQZXJmIGF1dG8gJm5ic3A7wrcmbmJzcDsgT0JTLTAzIFFUIMK3IFRyYW5zbWlzc2lvbjwvc3Bhbj4KICA8c3BhbiBjbGFzcz0icnVsZS1ub3RlIj7impEgMSBjb2RlL2Nhc2UgwrcgRG91dGUg4oaSICI/IiDCtyBTdHlsbyBub2lyPC9zcGFuPgo8L2Rpdj4KCjxkaXYgY2xhc3M9InNjcmVlbi1jb250cm9scyI+CiAgPGJ1dHRvbiBjbGFzcz0iYnRuIHByaW1hcnkiIG9uY2xpY2s9IndpbmRvdy5wcmludCgpIj7wn5aoIEltcHJpbWVyIMK3IEE0IFBheXNhZ2U8L2J1dHRvbj4KICA8YnV0dG9uIGNsYXNzPSJidG4gYnRuLWV4cG9ydCIgb25jbGljaz0iZXhwb3J0Q1NWKCkiPuKtsyBFeHBvcnRlciBDU1Y8L2J1dHRvbj4KICA8YnV0dG9uIGNsYXNzPSJidG4gYnRuLXJlc2V0IiBvbmNsaWNrPSJyZXNldEFsbCgpIj7ihrogUsOpaW5pdGlhbGlzZXI8L2J1dHRvbj4KICA8c3BhbiBzdHlsZT0iZm9udC1zaXplOjlweDtjb2xvcjojODg4O21hcmdpbi1sZWZ0OmF1dG87Ij5DaHJvbm8g4oaSIG5pdmVhdSBhdXRvbWF0aXF1ZSDCtyBDbGlxdWV6IEHCt0LCt0MgcG91ciBsZXMgb2JzZXJ2YWJsZXMgcXVhbGl0YXRpZnM8L3NwYW4+CjwvZGl2Pgo8ZGl2IGlkPSJleHBvcnQtbXNnIiBzdHlsZT0iZGlzcGxheTpub25lO2ZvbnQtc2l6ZTo5cHg7Zm9udC1mYW1pbHk6dmFyKC0tZm9udC11aSk7cGFkZGluZzo1cHggMTBweDtib3JkZXItcmFkaXVzOjJweDttYXJnaW4tYm90dG9tOjZweDsiPjwvZGl2PgoKPGRpdiBjbGFzcz0icGFnZSIgaWQ9InBhZ2UxIj48L2Rpdj4KPGRpdiBjbGFzcz0icGFnZSBwYWdlLWJyZWFrIiBpZD0icGFnZTIiPjwvZGl2PgoKPHNjcmlwdD4KLy8g4pSA4pSAIEZPVVJDSEVUVEVTIETDiUZJTklFUyBQQVIgTCdJQSDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAKLy8gQmFyw6htZSBvZmZpY2llbCBkZSByw6lmw6lyZW5jZSA6IDQgw5cgNTAgbSDCtyBDb2xsw6hnZS9MeWPDqWUgTWFyb2MgwrcgREkgUzEKLy8gR2Fyw6dvbnMgOiBDIOKJpDI4IjUgIMK3ICBCIDI4IjbigJMzNiIwICDCtyAgQSA+MzYiMAovLyBGaWxsZXMgIDogQyDiiaQzMyIwICDCtyAgQiAzMyIx4oCTNDIiMCAgwrcgIEEgPjQyIjAKLy8gTGVzIGF1dHJlcyBkaXN0YW5jZXMgKDMwLzQwLzYwLzgwbSkgc29udCBjYWxjdWzDqWVzIHBhciBzY2FsaW5nIGxpbsOpYWlyZQovLyBwcm9wb3J0aW9ubmVsIMOgIGxhIGRpc3RhbmNlIDogc2V1aWxfZCA9IHNldWlsXzUwbSDDlyAoZCAvIDUwKQpjb25zdCBCQVJFTUVfNTAgPSB7CiAgRzogeyBDOiAyOC41LCBCOiAzNi4wIH0sCiAgRjogeyBDOiAzMy4wLCBCOiA0Mi4wIH0KfTsKY29uc3QgRElTVEFOQ0VTX0RJU1BPTklCTEVTID0gWzMwLCA0MCwgNTAsIDYwLCA4MF07CgpmdW5jdGlvbiBjYWxjdWxlclNldWlscyhkaXN0YW5jZSkgewogIGNvbnN0IHJhdGlvID0gZGlzdGFuY2UgLyA1MDsKICByZXR1cm4gewogICAgRzogeyBDOiBNYXRoLnJvdW5kKEJBUkVNRV81MC5HLkMgKiByYXRpbyAqIDEwKSAvIDEwLCBCOiBNYXRoLnJvdW5kKEJBUkVNRV81MC5HLkIgKiByYXRpbyAqIDEwKSAvIDEwIH0sCiAgICBGOiB7IEM6IE1hdGgucm91bmQoQkFSRU1FXzUwLkYuQyAqIHJhdGlvICogMTApIC8gMTAsIEI6IE1hdGgucm91bmQoQkFSRU1FXzUwLkYuQiAqIHJhdGlvICogMTApIC8gMTAgfQogIH07Cn0KCmxldCBESVNUQU5DRV9BQ1RVRUxMRSA9IDUwOwpsZXQgU0VVSUxTID0gY2FsY3VsZXJTZXVpbHMoRElTVEFOQ0VfQUNUVUVMTEUpOwoKZnVuY3Rpb24gZm10U2VjKHYpIHsKICAvLyBBZmZpY2hlIDI4LjUgY29tbWUgMjgiNSAoZm9ybWF0IGNocm9ubyB0ZXJyYWluKQogIHJldHVybiBTdHJpbmcodikucmVwbGFjZSgnLicsICciJyk7Cn0KCmZ1bmN0aW9uIHVwZGF0ZUZvdXJjaGV0dGVCYXIoKSB7CiAgY29uc3QgcyA9IFNFVUlMUzsKICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZmJHLWMnKS5pbm5lckhUTUwgPSBgQyAmbmJzcDviiaQgJHtmbXRTZWMocy5HLkMpfWA7CiAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2ZiRy1iJykuaW5uZXJIVE1MID0gYEIgJm5ic3A7JHtmbXRTZWMoTWF0aC5yb3VuZCgocy5HLkMrMC4xKSoxMCkvMTApfSDigJMgJHtmbXRTZWMocy5HLkIpfWA7CiAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2ZiRy1hJykuaW5uZXJIVE1MID0gYEEgJm5ic3A7Jmd0OyAke2ZtdFNlYyhzLkcuQil9YDsKICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZmJGLWMnKS5pbm5lckhUTUwgPSBgQyAmbmJzcDviiaQgJHtmbXRTZWMocy5GLkMpfWA7CiAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2ZiRi1iJykuaW5uZXJIVE1MID0gYEIgJm5ic3A7JHtmbXRTZWMoTWF0aC5yb3VuZCgocy5GLkMrMC4xKSoxMCkvMTApfSDigJMgJHtmbXRTZWMocy5GLkIpfWA7CiAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2ZiRi1hJykuaW5uZXJIVE1MID0gYEEgJm5ic3A7Jmd0OyAke2ZtdFNlYyhzLkYuQil9YDsKfQoKZnVuY3Rpb24gb25EaXN0YW5jZUNoYW5nZSgpIHsKICBjb25zdCBzZWwgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZGlzdGFuY2VTZWxlY3QnKTsKICBESVNUQU5DRV9BQ1RVRUxMRSA9IHBhcnNlSW50KHNlbC52YWx1ZSwgMTApOwogIFNFVUlMUyA9IGNhbGN1bGVyU2V1aWxzKERJU1RBTkNFX0FDVFVFTExFKTsKICB1cGRhdGVGb3VyY2hldHRlQmFyKCk7CiAgY29uc3QgYmFkZ2UgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnYmFkZ2VEaXN0YW5jZScpOwogIGlmIChiYWRnZSkgYmFkZ2UudGV4dENvbnRlbnQgPSBgREkgwrcgOCDDiVFVSVBFUyDCtyA0w5cke0RJU1RBTkNFX0FDVFVFTExFfW1gOwogIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJy5ybC1kaXN0LWxhYmVsJykuZm9yRWFjaChlbCA9PiB7IGVsLnRleHRDb250ZW50ID0gRElTVEFOQ0VfQUNUVUVMTEU7IH0pOwogIC8vIFJlY2FsY3VsZXIgbGUgbml2ZWF1IGRlIHRvdXRlcyBsZXMgw6lxdWlwZXMgZMOpasOgIHNhaXNpZXMgYXZlYyBsZSBub3V2ZWF1IGJhcsOobWUKICBmb3IgKGxldCBuID0gMTsgbiA8PSA4OyBuKyspIHsKICAgIGNvbnN0IGlkID0gKG4gPCAxMCA/ICcwJyArIG4gOiAnJyArIG4pOwogICAgaWYgKGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdiJyArIGlkKSkgdXBkYXRlTml2ZWF1KGlkKTsKICB9Cn0KCmZ1bmN0aW9uIHBhcnNlY2hyb25vKHMpIHsKICAvLyBBY2NlcHRlIDogMjgiNSDCtyAyOC41IMK3IDI4LDUKICBjb25zdCBjbGVhbiA9IHMudHJpbSgpLnJlcGxhY2UoJywnLCcuJykucmVwbGFjZSgnIicsJy4nKTsKICBjb25zdCB2ID0gcGFyc2VGbG9hdChjbGVhbik7CiAgcmV0dXJuIGlzTmFOKHYpIHx8IHYgPD0gMCA/IG51bGwgOiB2Owp9CgpmdW5jdGlvbiBjYWxjTml2ZWF1KGNocm9ub1N0ciwgZ2VucmUpIHsKICBjb25zdCB2ID0gcGFyc2VjaHJvbm8oY2hyb25vU3RyKTsKICBpZiAodiA9PT0gbnVsbCB8fCAhZ2VucmUpIHJldHVybiBudWxsOwogIGNvbnN0IHMgPSBTRVVJTFNbZ2VucmVdOwogIHJldHVybiB2IDw9IHMuQyA/ICdjJyA6IHYgPD0gcy5CID8gJ2InIDogJ2EnOwp9CgpmdW5jdGlvbiB1cGRhdGVOaXZlYXUoaWQpIHsKICBjb25zdCBibG9jayA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdiJyArIGlkKTsKICBjb25zdCBjaSA9IGJsb2NrLnF1ZXJ5U2VsZWN0b3IoJy5jaHJvbm8taW5wdXQnKTsKICBjb25zdCBiYWRnZSA9IGJsb2NrLnF1ZXJ5U2VsZWN0b3IoJy5sZXZlbC1iYWRnZScpOwogIGNvbnN0IGdCdG4gPSBibG9jay5xdWVyeVNlbGVjdG9yKCcuZ2VucmUtYnRuLmFjdGl2ZS1nJyk7CiAgY29uc3QgZkJ0biA9IGJsb2NrLnF1ZXJ5U2VsZWN0b3IoJy5nZW5yZS1idG4uYWN0aXZlLWYnKTsKICBjb25zdCBnZW5yZSA9IGdCdG4gPyAnRycgOiBmQnRuID8gJ0YnIDogbnVsbDsKICBjb25zdCBuaXYgPSBjYWxjTml2ZWF1KGNpLnZhbHVlLCBnZW5yZSk7CiAgYmFkZ2UuY2xhc3NOYW1lID0gJ2xldmVsLWJhZGdlJyArIChuaXYgPyAnIGx2bC0nICsgbml2IDogJycpOwogIGJhZGdlLnRleHRDb250ZW50ID0gbml2ID8gbml2LnRvVXBwZXJDYXNlKCkgOiAn4oCUJzsKfQoKZnVuY3Rpb24gc2V0R2VucmUoYnRuLCBpZCwgZykgewogIGNvbnN0IGJsb2NrID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2InICsgaWQpOwogIGJsb2NrLnF1ZXJ5U2VsZWN0b3JBbGwoJy5nZW5yZS1idG4nKS5mb3JFYWNoKGIgPT4gYi5jbGFzc05hbWUgPSAnZ2VucmUtYnRuJyk7CiAgYnRuLmNsYXNzTGlzdC5hZGQoZyA9PT0gJ0cnID8gJ2FjdGl2ZS1nJyA6ICdhY3RpdmUtZicpOwogIHVwZGF0ZU5pdmVhdShpZCk7Cn0KCmZ1bmN0aW9uIHRvZ2dsZShidG4sIGRlZykgewogIGNvbnN0IGdycCA9IGJ0bi5jbG9zZXN0KCcuZGVnLWdyb3VwJyk7CiAgY29uc3Qgd2FzID0gYnRuLmNsYXNzTGlzdC5jb250YWlucygnc2VsLScgKyBkZWcpOwogIGdycC5xdWVyeVNlbGVjdG9yQWxsKCcuZGVnLWJ0bicpLmZvckVhY2goYiA9PiBiLmNsYXNzTmFtZSA9ICdkZWctYnRuJyk7CiAgaWYgKCF3YXMpIGJ0bi5jbGFzc0xpc3QuYWRkKCdzZWwtJyArIGRlZyk7Cn0KCmZ1bmN0aW9uIGRnKG9icykgewogIHJldHVybiBgPGRpdiBjbGFzcz0iZGVnLWdyb3VwIj4KICAgIDxkaXYgY2xhc3M9ImRlZy1idG4iIG9uY2xpY2s9InRvZ2dsZSh0aGlzLCdhJykiIHRpdGxlPSIke29ic33iiJIiPkE8L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImRlZy1idG4iIG9uY2xpY2s9InRvZ2dsZSh0aGlzLCdiJykiIHRpdGxlPSIke29ic31+Ij5CPC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJkZWctYnRuIiBvbmNsaWNrPSJ0b2dnbGUodGhpcywnYycpIiB0aXRsZT0iJHtvYnN9KyI+QzwvZGl2PgogIDwvZGl2PmA7Cn0KCmZ1bmN0aW9uIGJ1aWxkQmxvY2soaWQpIHsKICBjb25zdCBkaXYgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdkaXYnKTsKICBkaXYuY2xhc3NOYW1lID0gJ3RlYW0tYmxvY2snOwogIGRpdi5pZCA9ICdiJyArIGlkOwogIGRpdi5pbm5lckhUTUwgPSBgCiAgPGRpdiBjbGFzcz0idGVhbS1oZWFkIj4KICAgIDxzcGFuIGNsYXNzPSJ0ZWFtLW51bSI+w4lRICR7aWR9PC9zcGFuPgogICAgPGlucHV0IGNsYXNzPSJ0ZWFtLW5hbWUtaW5wdXQiIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSJOb20gZGUgbCfDqXF1aXBlLi4uIj4KICAgIDxzcGFuIGNsYXNzPSJ0ZWFtLWRhdGUiPlPDqWFuY2UgOiZuYnNwO19fXzwvc3Bhbj4KICA8L2Rpdj4KCiAgPGRpdiBjbGFzcz0ic2VjLWxhYmVsIj5PQlMtMDEgwrcgUXVhbGl0w6kgY29sbGVjdGl2ZSBkdSByZWxhaXM8L2Rpdj4KICA8ZGl2IGNsYXNzPSJjb2xsZWN0aWYtcm93Ij4KICAgIDxzcGFuIGNsYXNzPSJvYnMtbGFiZWwiPlFDIEdMT0JBTDwvc3Bhbj4KICAgICR7ZGcoJ1FDJyl9CiAgICA8ZGl2IGNsYXNzPSJpbmRpY2UtYm94Ij48c3Bhbj5JbmRpY2U8L3NwYW4+PGlucHV0IHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSIwLDAiPjwvZGl2PgogIDwvZGl2PgoKICA8ZGl2IGNsYXNzPSJzZWMtbGFiZWwiPk9CUy0wMiDCtyBQZXJmb3JtYW5jZSDDqXF1aXBlIOKAlCBuaXZlYXUgYXV0b21hdGlxdWU8L2Rpdj4KICA8ZGl2IGNsYXNzPSJwZXJmLXNlY3Rpb24iPgogICAgPGRpdiBjbGFzcz0icGVyZi1yb3ciPgogICAgICA8c3BhbiBjbGFzcz0icGVyZi1sYWJlbCI+Q0hST05PIMOJUTwvc3Bhbj4KICAgICAgPGlucHV0IGNsYXNzPSJjaHJvbm8taW5wdXQiIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSdfXyJfXycgb25pbnB1dD0idXBkYXRlTml2ZWF1KCcke2lkfScpIj4KICAgICAgPHNwYW4gY2xhc3M9ImNocm9uby1mbXQiPmV4Jm5ic3A7MjgiNTwvc3Bhbj4KICAgICAgPGRpdiBjbGFzcz0iZ2VucmUtdG9nZ2xlIj4KICAgICAgICA8YnV0dG9uIGNsYXNzPSJnZW5yZS1idG4iIG9uY2xpY2s9InNldEdlbnJlKHRoaXMsJyR7aWR9JywnRycpIj5HPC9idXR0b24+CiAgICAgICAgPGJ1dHRvbiBjbGFzcz0iZ2VucmUtYnRuIiBvbmNsaWNrPSJzZXRHZW5yZSh0aGlzLCcke2lkfScsJ0YnKSI+RjwvYnV0dG9uPgogICAgICA8L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0ibGV2ZWwtYmFkZ2UiPuKAlDwvZGl2PgogICAgPC9kaXY+CiAgPC9kaXY+CgogIDxkaXYgY2xhc3M9InNlYy1sYWJlbCI+UmVsYXlldXJzIMK3IGNocm9ubyBpbmRpdi4gKDxzcGFuIGNsYXNzPSJybC1kaXN0LWxhYmVsIj4ke0RJU1RBTkNFX0FDVFVFTExFfTwvc3Bhbj5tKTwvZGl2PgogIDxkaXYgY2xhc3M9InJlbGF5ZXVycy1saXN0Ij4KICAgIDxkaXYgY2xhc3M9InItcm93Ij48c3BhbiBjbGFzcz0ici1udW0iPlIxPC9zcGFuPjxpbnB1dCBjbGFzcz0ici1jaHJvbm8iIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSc3IjInPjxpbnB1dCBjbGFzcz0ici1uYW1lIiB0eXBlPSJ0ZXh0IiBwbGFjZWhvbGRlcj0iTm9tLi4uIj48L2Rpdj4KICAgIDxkaXYgY2xhc3M9InItcm93Ij48c3BhbiBjbGFzcz0ici1udW0iPlIyPC9zcGFuPjxpbnB1dCBjbGFzcz0ici1jaHJvbm8iIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSc3IjgnPjxpbnB1dCBjbGFzcz0ici1uYW1lIiB0eXBlPSJ0ZXh0IiBwbGFjZWhvbGRlcj0iTm9tLi4uIj48L2Rpdj4KICAgIDxkaXYgY2xhc3M9InItcm93Ij48c3BhbiBjbGFzcz0ici1udW0iPlIzPC9zcGFuPjxpbnB1dCBjbGFzcz0ici1jaHJvbm8iIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSc2IjknPjxpbnB1dCBjbGFzcz0ici1uYW1lIiB0eXBlPSJ0ZXh0IiBwbGFjZWhvbGRlcj0iTm9tLi4uIj48L2Rpdj4KICAgIDxkaXYgY2xhc3M9InItcm93Ij48c3BhbiBjbGFzcz0ici1udW0iPlI0PC9zcGFuPjxpbnB1dCBjbGFzcz0ici1jaHJvbm8iIHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSc4IjEnPjxpbnB1dCBjbGFzcz0ici1uYW1lIiB0eXBlPSJ0ZXh0IiBwbGFjZWhvbGRlcj0iTm9tLi4uIj48L2Rpdj4KICA8L2Rpdj4KCiAgPGRpdiBjbGFzcz0ic2VjLWxhYmVsIj5PQlMtMDMgwrcgUXVhbGl0w6kgZGUgdHJhbnNtaXNzaW9uPC9kaXY+CiAgPGRpdiBjbGFzcz0iY2hhcm5pZXJlLXJvdyI+CiAgICA8c3BhbiBjbGFzcz0iY2gtbGFiZWwiPkNoMSDCtyBSMeKGklIyPC9zcGFuPgogICAgPHNwYW4gY2xhc3M9Im9icy10YWciPlFUPC9zcGFuPiR7ZGcoJ1FUJyl9CiAgPC9kaXY+CiAgPGRpdiBjbGFzcz0iY2hhcm5pZXJlLXJvdyI+CiAgICA8c3BhbiBjbGFzcz0iY2gtbGFiZWwiPkNoMiDCtyBSMuKGklIzPC9zcGFuPgogICAgPHNwYW4gY2xhc3M9Im9icy10YWciPlFUPC9zcGFuPiR7ZGcoJ1FUJyl9CiAgPC9kaXY+CiAgPGRpdiBjbGFzcz0iY2hhcm5pZXJlLXJvdyI+CiAgICA8c3BhbiBjbGFzcz0iY2gtbGFiZWwiPkNoMyDCtyBSM+KGklI0PC9zcGFuPgogICAgPHNwYW4gY2xhc3M9Im9icy10YWciPlFUPC9zcGFuPiR7ZGcoJ1FUJyl9CiAgPC9kaXY+CgogIDxkaXYgY2xhc3M9InByb2ZpbC1mb290ZXIiPgogICAgPHNwYW4gY2xhc3M9InBmLWxhYmVsIj5Qcm9maWwgw4lRPC9zcGFuPgogICAgJHtkZygnUFJPRklMJyl9CiAgICA8aW5wdXQgY2xhc3M9Im9icy1maWVsZCIgdHlwZT0idGV4dCIgcGxhY2Vob2xkZXI9Ik9ic2VydmF0aW9ucyBsaWJyZXMuLi4iPgogIDwvZGl2PmA7CiAgcmV0dXJuIGRpdjsKfQoKY29uc3QgcDEgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgncGFnZTEnKTsKY29uc3QgcDIgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgncGFnZTInKTsKWycwMScsJzAyJywnMDMnLCcwNCddLmZvckVhY2gobiA9PiBwMS5hcHBlbmRDaGlsZChidWlsZEJsb2NrKG4pKSk7ClsnMDUnLCcwNicsJzA3JywnMDgnXS5mb3JFYWNoKG4gPT4gcDIuYXBwZW5kQ2hpbGQoYnVpbGRCbG9jayhuKSkpOwoKZnVuY3Rpb24gZ2V0RGVnKGdycCkgewogIGlmICghZ3JwKSByZXR1cm4gJyc7CiAgY29uc3Qgc2VsID0gZ3JwLnF1ZXJ5U2VsZWN0b3IoJy5kZWctYnRuLnNlbC1hLC5kZWctYnRuLnNlbC1iLC5kZWctYnRuLnNlbC1jJyk7CiAgaWYgKCFzZWwpIHJldHVybiAnJzsKICBpZiAoc2VsLmNsYXNzTGlzdC5jb250YWlucygnc2VsLWEnKSkgcmV0dXJuICdBJzsKICBpZiAoc2VsLmNsYXNzTGlzdC5jb250YWlucygnc2VsLWInKSkgcmV0dXJuICdCJzsKICByZXR1cm4gJ0MnOwp9CgpmdW5jdGlvbiBjc3ZFc2NhcGUodikgewogIHYgPSAodiA9PT0gbnVsbCB8fCB2ID09PSB1bmRlZmluZWQpID8gJycgOiBTdHJpbmcodik7CiAgaWYgKHYuaW5jbHVkZXMoJzsnKSB8fCB2LmluY2x1ZGVzKCciJykgfHwgdi5pbmNsdWRlcygnXG4nKSkgewogICAgcmV0dXJuICciJyArIHYucmVwbGFjZSgvIi9nLCAnIiInKSArICciJzsKICB9CiAgcmV0dXJuIHY7Cn0KCmZ1bmN0aW9uIGV4cG9ydENTVigpIHsKICBjb25zdCBoZWFkZXJzID0gWwogICAgJ05vbV9FcXVpcGUnLCAnT0JTLTAxIFFDJywgJ0luZGljZV90cmFuc21pc3Npb24nLAogICAgJ0Rpc3RhbmNlJywgJ0Nocm9ubycsICdHZW5yZScsICdPQlMtMDIgUGVyZicsCiAgICAnUjEnLCAnUjFfQ2hyb25vJywgJ1IyJywgJ1IyX0Nocm9ubycsICdSMycsICdSM19DaHJvbm8nLCAnUjQnLCAnUjRfQ2hyb25vJywKICAgICdDaDFfUVQnLCAnQ2gyX1FUJywgJ0NoM19RVCcsCiAgICAnUHJvZmlsX0VxdWlwZScsICdPYnNlcnZhdGlvbnMnCiAgXTsKCiAgY29uc3Qgcm93cyA9IFtdOwogIGxldCBmaWxsZWQgPSAwOwoKICBmb3IgKGxldCBuID0gMTsgbiA8PSA4OyBuKyspIHsKICAgIGNvbnN0IGlkID0gKG4gPCAxMCA/ICcwJyArIG4gOiAnJyArIG4pOwogICAgY29uc3QgYmxvY2sgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnYicgKyBpZCk7CiAgICBpZiAoIWJsb2NrKSBjb250aW51ZTsKCiAgICBjb25zdCBub20gPSBibG9jay5xdWVyeVNlbGVjdG9yKCcudGVhbS1uYW1lLWlucHV0JykudmFsdWUudHJpbSgpOwoKICAgIGNvbnN0IGRlZ0dyb3VwcyA9IGJsb2NrLnF1ZXJ5U2VsZWN0b3JBbGwoJy5kZWctZ3JvdXAnKTsKICAgIC8vIE9yZHJlIGQnYXBwYXJpdGlvbiA6IFswXT1RQyBnbG9iYWwsIFsxXT1DaDEgUVQsIFsyXT1DaDIgUVQsIFszXT1DaDMgUVQsIFs0XT1Qcm9maWwKICAgIGNvbnN0IHFjICAgICAgPSBnZXREZWcoZGVnR3JvdXBzWzBdKTsKICAgIGNvbnN0IGNoMXF0ICAgPSBnZXREZWcoZGVnR3JvdXBzWzFdKTsKICAgIGNvbnN0IGNoMnF0ICAgPSBnZXREZWcoZGVnR3JvdXBzWzJdKTsKICAgIGNvbnN0IGNoM3F0ICAgPSBnZXREZWcoZGVnR3JvdXBzWzNdKTsKICAgIGNvbnN0IHByb2ZpbCAgPSBnZXREZWcoZGVnR3JvdXBzWzRdKTsKCiAgICBjb25zdCBpbmRpY2UgPSBibG9jay5xdWVyeVNlbGVjdG9yKCcuaW5kaWNlLWJveCBpbnB1dCcpLnZhbHVlLnRyaW0oKTsKCiAgICBjb25zdCBjaHJvbm9JbnB1dCA9IGJsb2NrLnF1ZXJ5U2VsZWN0b3IoJy5jaHJvbm8taW5wdXQnKTsKICAgIGNvbnN0IGNocm9ubyA9IGNocm9ub0lucHV0ID8gY2hyb25vSW5wdXQudmFsdWUudHJpbSgpIDogJyc7CgogICAgY29uc3QgZ0J0biA9IGJsb2NrLnF1ZXJ5U2VsZWN0b3IoJy5nZW5yZS1idG4uYWN0aXZlLWcnKTsKICAgIGNvbnN0IGZCdG4gPSBibG9jay5xdWVyeVNlbGVjdG9yKCcuZ2VucmUtYnRuLmFjdGl2ZS1mJyk7CiAgICBjb25zdCBnZW5yZSA9IGdCdG4gPyAnRycgOiBmQnRuID8gJ0YnIDogJyc7CgogICAgY29uc3Qgbml2ZWF1QmFkZ2UgPSBibG9jay5xdWVyeVNlbGVjdG9yKCcubGV2ZWwtYmFkZ2UnKTsKICAgIGNvbnN0IG5pdmVhdVR4dCA9IG5pdmVhdUJhZGdlID8gbml2ZWF1QmFkZ2UudGV4dENvbnRlbnQudHJpbSgpIDogJyc7CiAgICBjb25zdCBvYnMwMiA9IChuaXZlYXVUeHQgPT09ICdBJyB8fCBuaXZlYXVUeHQgPT09ICdCJyB8fCBuaXZlYXVUeHQgPT09ICdDJykgPyBuaXZlYXVUeHQgOiAnJzsKCiAgICBjb25zdCByTmFtZXMgPSBibG9jay5xdWVyeVNlbGVjdG9yQWxsKCcuci1uYW1lJyk7CiAgICBjb25zdCByQ2hyb25vcyA9IGJsb2NrLnF1ZXJ5U2VsZWN0b3JBbGwoJy5yLWNocm9ubycpOwogICAgY29uc3QgcjEgPSByTmFtZXNbMF0gPyByTmFtZXNbMF0udmFsdWUudHJpbSgpIDogJyc7CiAgICBjb25zdCByMiA9IHJOYW1lc1sxXSA/IHJOYW1lc1sxXS52YWx1ZS50cmltKCkgOiAnJzsKICAgIGNvbnN0IHIzID0gck5hbWVzWzJdID8gck5hbWVzWzJdLnZhbHVlLnRyaW0oKSA6ICcnOwogICAgY29uc3QgcjQgPSByTmFtZXNbM10gPyByTmFtZXNbM10udmFsdWUudHJpbSgpIDogJyc7CiAgICBjb25zdCByMWMgPSByQ2hyb25vc1swXSA/IHJDaHJvbm9zWzBdLnZhbHVlLnRyaW0oKSA6ICcnOwogICAgY29uc3QgcjJjID0gckNocm9ub3NbMV0gPyByQ2hyb25vc1sxXS52YWx1ZS50cmltKCkgOiAnJzsKICAgIGNvbnN0IHIzYyA9IHJDaHJvbm9zWzJdID8gckNocm9ub3NbMl0udmFsdWUudHJpbSgpIDogJyc7CiAgICBjb25zdCByNGMgPSByQ2hyb25vc1szXSA/IHJDaHJvbm9zWzNdLnZhbHVlLnRyaW0oKSA6ICcnOwoKICAgIGNvbnN0IG9ic0ZpZWxkID0gYmxvY2sucXVlcnlTZWxlY3RvcignLm9icy1maWVsZCcpOwogICAgY29uc3Qgb2JzID0gb2JzRmllbGQgPyBvYnNGaWVsZC52YWx1ZS50cmltKCkgOiAnJzsKCiAgICBjb25zdCBoYXNBbnlEYXRhID0gbm9tIHx8IHFjIHx8IGNocm9ubyB8fCBwcm9maWwgfHwgY2gxcXQgfHwgY2gycXQgfHwgY2gzcXQgfHwgcjFjIHx8IHIyYyB8fCByM2MgfHwgcjRjOwogICAgaWYgKCFoYXNBbnlEYXRhKSBjb250aW51ZTsKCiAgICBmaWxsZWQrKzsKICAgIHJvd3MucHVzaChbCiAgICAgIG5vbSB8fCAoJ8OJcXVpcGUgJyArIGlkKSwgcWMsIGluZGljZSwKICAgICAgRElTVEFOQ0VfQUNUVUVMTEUsIGNocm9ubywgZ2VucmUsIG9iczAyLAogICAgICByMSwgcjFjLCByMiwgcjJjLCByMywgcjNjLCByNCwgcjRjLAogICAgICBjaDFxdCwgY2gycXQsIGNoM3F0LAogICAgICBwcm9maWwsIG9icwogICAgXSk7CiAgfQoKICBjb25zdCBtc2dFbCA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdleHBvcnQtbXNnJyk7CgogIGlmIChmaWxsZWQgPT09IDApIHsKICAgIG1zZ0VsLnN0eWxlLmRpc3BsYXkgPSAnYmxvY2snOwogICAgbXNnRWwuc3R5bGUuYmFja2dyb3VuZCA9ICcjRkNFQkVCJzsKICAgIG1zZ0VsLnN0eWxlLmNvbG9yID0gJyM4YjFhMWEnOwogICAgbXNnRWwudGV4dENvbnRlbnQgPSAn4pqgIEF1Y3VuZSDDqXF1aXBlIHJlbnNlaWduw6llIOKAlCByaWVuIMOgIGV4cG9ydGVyLic7CiAgICByZXR1cm47CiAgfQoKICBsZXQgY3N2ID0gaGVhZGVycy5tYXAoY3N2RXNjYXBlKS5qb2luKCc7JykgKyAnXHJcbic7CiAgcm93cy5mb3JFYWNoKHIgPT4geyBjc3YgKz0gci5tYXAoY3N2RXNjYXBlKS5qb2luKCc7JykgKyAnXHJcbic7IH0pOwoKICBjb25zdCBibG9iID0gbmV3IEJsb2IoWydcdUZFRkYnICsgY3N2XSwgeyB0eXBlOiAndGV4dC9jc3Y7Y2hhcnNldD11dGYtODsnIH0pOwogIGNvbnN0IHVybCA9IFVSTC5jcmVhdGVPYmplY3RVUkwoYmxvYik7CiAgY29uc3QgYSA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2EnKTsKICBjb25zdCB0b2RheSA9IG5ldyBEYXRlKCkudG9JU09TdHJpbmcoKS5zbGljZSgwLDEwKTsKICBhLmhyZWYgPSB1cmw7CiAgYS5kb3dubG9hZCA9ICdHcmlsbGVUZXJyYWluX0NSX2V4cG9ydF8nICsgdG9kYXkgKyAnLmNzdic7CiAgZG9jdW1lbnQuYm9keS5hcHBlbmRDaGlsZChhKTsKICBhLmNsaWNrKCk7CiAgZG9jdW1lbnQuYm9keS5yZW1vdmVDaGlsZChhKTsKICBzZXRUaW1lb3V0KCgpID0+IFVSTC5yZXZva2VPYmplY3RVUkwodXJsKSwgNjAwMDApOwoKICBtc2dFbC5zdHlsZS5kaXNwbGF5ID0gJ2Jsb2NrJzsKICBtc2dFbC5zdHlsZS5iYWNrZ3JvdW5kID0gJyNFQUYzREUnOwogIG1zZ0VsLnN0eWxlLmNvbG9yID0gJyMxYTVlMGEnOwogIG1zZ0VsLnRleHRDb250ZW50ID0gJ+KckyAnICsgZmlsbGVkICsgJyDDqXF1aXBlKHMpIGV4cG9ydMOpZShzKSDigJQgZmljaGllciB0w6lsw6ljaGFyZ8OpLiBJbXBvcnRlei1sZSBkYW5zIGxcJ091dGlsIENSICjDiXRhcGUgU2Fpc2llIOKGkiBJbXBvcnRlciBDU1YpLic7Cn0KCmZ1bmN0aW9uIHJlc2V0QWxsKCkgewogIGlmICghY29uZmlybSgnUsOpaW5pdGlhbGlzZXIgdG91dGVzIGxlcyBzYWlzaWVzID8nKSkgcmV0dXJuOwogIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJy5kZWctYnRuJykuZm9yRWFjaChiID0+IGIuY2xhc3NOYW1lID0gJ2RlZy1idG4nKTsKICBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCdpbnB1dFt0eXBlPSJ0ZXh0Il0nKS5mb3JFYWNoKGkgPT4gaS52YWx1ZSA9ICcnKTsKICBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCcuZ2VucmUtYnRuJykuZm9yRWFjaChiID0+IGIuY2xhc3NOYW1lID0gJ2dlbnJlLWJ0bicpOwogIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJy5sZXZlbC1iYWRnZScpLmZvckVhY2goYiA9PiB7CiAgICBiLmNsYXNzTmFtZSA9ICdsZXZlbC1iYWRnZSc7IGIudGV4dENvbnRlbnQgPSAn4oCUJzsKICB9KTsKICBjb25zdCBtc2dFbCA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdleHBvcnQtbXNnJyk7CiAgbXNnRWwuc3R5bGUuZGlzcGxheSA9ICdub25lJzsKfQo8L3NjcmlwdD4KPC9ib2R5Pgo8L2h0bWw+Cg==';
+
+function _grilleDIBlobUrl() {
+  var bin = atob(GRILLE_DI_B64);
+  var bytes = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) { bytes[i] = bin.charCodeAt(i); }
+  var blob = new Blob([bytes], { type: 'text/html; charset=utf-8' });
+  return URL.createObjectURL(blob);
+}
+
+function _telechargerGrilleBlob(url) {
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'GrilleTerrain_DI_CR_8eq_ADP2026.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function ouvrirGrilleDI() {
+  try {
+    var url = _grilleDIBlobUrl();
+    var win = window.open(url, '_blank');
+    var popupBloque = !win;
+    if (win) {
+      try { popupBloque = win.closed; } catch(inner) { popupBloque = false; }
+    }
+    if (popupBloque) {
+      _telechargerGrilleBlob(url);
+      if (typeof showAlert === 'function') {
+        showAlert("La fenêtre de la grille a été bloquée par le navigateur. Le fichier a été téléchargé à la place — ouvrez-le depuis vos téléchargements.", "warn");
+      } else {
+        alert('Fenêtre bloquée : la grille a été téléchargée à la place.');
+      }
+    }
+    setTimeout(function() { URL.revokeObjectURL(url); }, 120000);
+  } catch(e) {
+    alert('Erreur ouverture grille : ' + e.message);
+  }
+}
+
+function telechargerGrilleDI() {
+  try {
+    var url = _grilleDIBlobUrl();
+    _telechargerGrilleBlob(url);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 120000);
+  } catch(e) {
+    alert('Erreur téléchargement grille : ' + e.message);
+  }
+}
+
+/* ================================================
+   TUTORIEL
+================================================ */
+var TUTO_STEPS=[
+  {num:1,titre:"Bienvenue — v4 avec Indice de Relais",
+   illus:'<span class="hl">OUTIL D\'AIDE À LA DÉCISION — COURSE DE RELAIS</span>\n<span class="gold">ADP 2026 · CRMEF Inezgane · v4 — INDICE DE RELAIS</span>\n\n  [ ▶ Saisie ] [ 1 Diagnostic ] [ 2 Axes ] [ 3 Paramètres ] [ 4 Planification ]\n\n  <span class="ok">🆕 Performance individuelle + Indice de Relais automatique</span>',
+   desc:"Cet outil vous guide en <strong>4 étapes</strong>. La nouveauté v4 : saisir les <strong>chronos individuels</strong> de chaque relayeur pour calculer automatiquement l'<strong>Indice de Relais</strong>.",
+   tip:"💡 Commencez par la Saisie. Les étapes se débloquent au fur et à mesure."},
+  {num:2,titre:"Saisie — Équipes + Relayeurs individuels",
+   illus:'<span class="hl">SAISIE PAR ÉQUIPE + PERFORMANCE INDIVIDUELLE</span>\n\n  Équipe Atlas   [A] [B] [C]  27"8 G → C   [A] [B] [C]\n\n  ⚡ Relayeurs (chrono individuel sur 50m) :\n    1 Ahmed  → 7"2"\n    2 Youssef → 7"8"\n    3 Mehdi  → 6"9"\n    4 Karim  → 8"1"\n  [ ⚡ Calc. Indice ]',
+   desc:"Remplissez OBS-01, OBS-02 (chrono + G/F), OBS-03 pour chaque équipe. <strong>Nouveau :</strong> saisissez le nom et chrono individuel de chaque relayeur, puis cliquez <strong>⚡ Calc. Indice</strong>.",
+   tip:"💡 Le chrono individuel = temps sur la distance unitaire (ex: 50m). Le chrono collectif = temps du relais 4×50m."},
+  {num:3,titre:"L'Indice de Relais — Comment ça marche ?",
+   illus:'<span class="hl">FORMULE INDICE DE RELAIS</span>\n\n  Indice = Σ Chronos individuels − Chrono collectif\n\n  Exemple :\n  Ahmed 7"2 + Youssef 7"8 + Mehdi 6"9 + Karim 8"1 = 30"0\n  Chrono collectif équipe = 28"5\n\n  <span class="ok">Indice = 30"0 − 28"5 = +1"5 ✅ POSITIF</span>\n  → les transmissions font GAGNER 1"5 à l\'équipe !',
+   desc:"<strong>Indice positif ✅</strong> = les transmissions améliorent la performance (relais efficace).<br><strong>Indice négatif ❌</strong> = les transmissions font perdre du temps (priorité : axes 2 & 3).",
+   tip:"💡 Référence par relayeur = Perf. collective ÷ 4. Un relayeur en dessous de cette référence est un point fort pour l'équipe."},
+  {num:4,titre:"Étape 1 — Diagnostic + Tableau Indice",
+   illus:'<span class="hl">ÉTAPE 1 — DIAGNOSTIC DE CLASSE + INDICE</span>\n\n  🔴 A: 4  🟡 B: 3  🟢 C: 1\n\n  ⚡ INDICE DE RELAIS\n  Équipe   Collectif  Σ Indiv  Indice\n  Atlas    28"5       30"0     <span class="ok">+1"5 ✅</span>\n  Toubkal  35"2       32"8     <span class="warn">−2"4 ❌</span>\n  ─────────────────────────────────\n  Moyenne classe : <span class="warn">−0"45</span> → priorité transmissions',
+   desc:"Après l'analyse, le <strong>Tableau Indice de Relais</strong> s'affiche automatiquement avec le détail par équipe et par relayeur, plus une décision pédagogique collective.",
+   tip:"💡 Utilisez cet indice pour prioriser les axes 2 & 3 (dissociation, posture) si la majorité des équipes a un indice négatif."},
+  {num:5,titre:"Étapes 2, 3 & 4 — Axes et planification",
+   illus:'<span class="hl">ÉTAPE 2 — AXES PRIORITAIRES (3 ou 4 max)</span>\n\n  ☑ Axe 1 — Marque de passage     [Recommandé] 72%\n  ☑ Axe 2 — Dissociation          [Recommandé] 65%\n  ☑ Axe 4 — Communication         [Complém.]   50%\n\n<span class="hl">ÉTAPE 4 — PLANIFICATION DIFFÉRENCIÉE</span>\n  S1 → Axe 1 | Gr.A consigne A | Gr.B consigne B | Gr.C consigne C',
+   desc:"Sélectionnez 3 ou 4 axes selon les lacunes. Réglez le nombre de séances et générez la planification différenciée A/B/C automatiquement.",
+   tip:"💡 Les axes recommandés sont ceux les plus directement liés à l'Indice de Relais."}
+];
+var tutoStep=0;
+
+function openTuto(){ tutoStep=0; document.getElementById('tutoOverlay').classList.add('open'); document.body.style.overflow='hidden'; renderTuto(); }
+function closeTuto(){ document.getElementById('tutoOverlay').classList.remove('open'); document.body.style.overflow=''; }
+function tutoClickOutside(e){ if(e.target===document.getElementById('tutoOverlay')) closeTuto(); }
+function tutoNav(dir){ tutoStep=Math.max(0,Math.min(TUTO_STEPS.length-1,tutoStep+dir)); renderTuto(); }
+function renderTuto(){
+  const total=TUTO_STEPS.length, s=TUTO_STEPS[tutoStep];
+  let dotsHtml='';
+  for(let i=0;i<total;i++) dotsHtml+=`<div class="tuto-dot ${i===tutoStep?'active':i<tutoStep?'done':''}"></div>`;
+  document.getElementById('tutoDots').innerHTML=dotsHtml;
+  document.getElementById('tutoBody').innerHTML=
+    `<div class="tuto-step-num">Étape ${s.num} / ${total}</div>
+    <div class="tuto-step-title">${s.titre}</div>
+    <div class="tuto-illus">${s.illus}</div>
+    <div class="tuto-desc">${s.desc}</div>
+    ${s.tip?`<div class="tuto-tip">${s.tip}</div>`:''}`;
+  document.getElementById('tutoCounter').textContent=`${s.num} / ${total}`;
+  document.getElementById('tutoPrev').style.display=tutoStep===0?'none':'';
+  const next=document.getElementById('tutoNext');
+  if(tutoStep===total-1){ next.innerHTML='✓ Commencer'; next.className='tuto-btn success'; next.onclick=()=>closeTuto(); }
+  else { next.innerHTML='Suivant →'; next.className='tuto-btn primary'; next.onclick=()=>tutoNav(1); }
+}
+document.addEventListener('keydown',function(e){
+  if(!document.getElementById('tutoOverlay').classList.contains('open')) return;
+  if(e.key==='ArrowRight'||e.key==='Enter') tutoNav(1);
+  if(e.key==='ArrowLeft') tutoNav(-1);
+  if(e.key==='Escape') closeTuto();
+});
+
+/* ================================================
+   DARK MODE
+================================================ */
+function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); }
+
+/* ================================================
+   INIT
+================================================ */
+window.addEventListener('load',function(){
+  updateBaremePreview();
+  const restored=loadState();
+  if(restored&&eleves.length>0){
+    eleves.forEach(e=>addRow({nom:e.nom,d1:e.degs[0],d3:e.degs[2],chrono:e.chrono,genre:e.genre,relayeurs:e.relayeurs||[]}));
+    showAlert("Session précédente restaurée.","success");
+  } else {
+    addRow(); addRow(); addRow();
+  }
+  // Ouvrir le tutoriel à la première visite
+  if(!localStorage.getItem(STORAGE_KEY+'_tuto_seen')){
+    setTimeout(()=>{ openTuto(); localStorage.setItem(STORAGE_KEY+'_tuto_seen','1'); }, 600);
+  }
+});
+</script>
+
+</body>
+</html>
